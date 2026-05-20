@@ -1,0 +1,181 @@
+### DEPOSIT
+
+### Positive test: Authorized user can add deposit less than 5000
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 2,
+  "balance": 100
+}
+
+### Positive test: Authorized user can add deposit amount equal 5000
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 2,
+  "balance": 5000
+}
+
+### Negative test: Authorized user can not add deposit amount more than 5000
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 2,
+  "balance": 5200
+}
+
+### Negative test: Authorized user can not add negative deposit amount
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 2,
+  "balance": -200
+}
+
+### Negative test: Authorized user can not add deposit to not existing account
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 24,
+  "balance": 200
+}
+
+### Negative test: Authorized user can not add deposit to account of another user
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "id": 3,
+  "balance": 200
+}
+### TRANSFER MONEY
+
+### Positive test: Authorized user can transfer money to another account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 3,
+  "amount": 50
+}
+
+### Negative test: Authorized user cannot transfer money to another account more than 10000
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 3,
+  "amount": 10000
+}
+
+### Negative test: Authorized user cannot transfer money to another account exceed personal account balance
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 3,
+  "amount": 8000
+}
+
+### Negative test: Authorized user cannot transfer negative ammount of money to another account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 3,
+  "amount": -900
+}
+
+### Positive test: Authorized user can transfer money to another personal account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 2,
+  "receiverAccountId": 1,
+  "amount": 900
+}
+
+
+### Negative test: Authorized user can not transfer money to not existing account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "senderAccountId": 112,
+  "receiverAccountId": 1,
+  "amount": 900
+}
+
+### CHANGE NAME
+
+### Positive test: Authorized user can change user name with valid name
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "name": "Alice Ivanova"
+}
+
+### Negative test: Authorized user can not change user name with name length more than 2 words
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "name": "Alice Ivanova Petrovna"
+}
+
+### Negative test: Authorized user can not change user name without letters, only digits
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "name": "4567 8790"
+}
+
+### Negative test: Authorized user can not change user name without letters, only symbols
+PUT http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+{
+  "name": "&*^%$"
+}
+
+
+### Positive test: Authorized user can get profile info
+GET http://localhost:4111/api/v1/customer/profile
+Content-Type: application/json
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+
+
+
+
+
+
+

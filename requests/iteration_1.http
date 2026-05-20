@@ -1,0 +1,161 @@
+### Positive test: Get AUTH Token
+POST http://localhost:4111/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+### Positive test: Admin can create new user with correct data
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "stongPassword45_#",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with blank User name
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "  ",
+  "password": "stongPassword45_#",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with 2 or 16 characters
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "abcdefgtyhtrsfht",
+  "password": "stongPassword45_#",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with forbitten symbols
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "abcd#$",
+  "password": "stongPassword45_#",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with blank password
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with password less than 8 charachters
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "hj87D#",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with password without one digit character
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "hjyuY%$TT",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with password without one spechial character
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "hj87DoPGF6",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with password without one Upper case character
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "hj9887o%$6",
+  "role": "USER"
+}
+
+### Negative test: Admin cannot create new user with password without one Lower case character
+POST http://localhost:4111/api/v1/admin/users
+Authorization: Basic YWRtaW46YWRtaW4=
+Content-Type: application/json
+
+{
+  "username": "kate",
+  "password": "JO887PO%$6",
+  "role": "USER"
+}
+
+### Negative test: Create User that already exists by Admin
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "Alice1997",
+  "password": "mySTRONGPassword1997$"
+}
+
+### Negative test: Admin can not create User with not existing Role
+POST http://localhost:4111/api/v1/admin/users
+Content-Type: application/json
+Authorization: Basic YWRtaW46YWRtaW4=
+
+{
+  "username": "Alice1997",
+  "password": "mySTRONGPassword1997$",
+  "role" : "EDITOR"
+}
+
+### Positive test: Create Account by Authorized User (Alice)
+POST http://localhost:4111/api/v1/accounts
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+Content-Type: application/json
+
+### Positive test: Check account was created
+GET http://localhost:4111/api/v1/customer/accounts
+Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+
+Content-Type: application/json
+
+### Positive test: Create Account by Authorized User (testUser)
+POST http://localhost:4111/api/v1/accounts
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
+Content-Type: application/json
+
+
+
+
+
