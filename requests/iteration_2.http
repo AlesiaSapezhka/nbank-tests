@@ -3,10 +3,10 @@
 ### Positive test: Authorized user can add deposit less than 5000
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic YWRtaW46YWRtaW4=
 
 {
-  "id": 2,
+  "id": 1,
   "balance": 100
 }
 
@@ -59,17 +59,18 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
   "id": 3,
   "balance": 200
 }
+
 ### TRANSFER MONEY
 
 ### Positive test: Authorized user can transfer money to another account
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic QWxleC0xODpBbGV4XzAwMCM=
 
 {
-  "senderAccountId": 2,
-  "receiverAccountId": 3,
-  "amount": 50
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 10
 }
 
 ### Negative test: Authorized user cannot transfer money to another account more than 10000
