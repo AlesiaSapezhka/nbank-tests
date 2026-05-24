@@ -33,8 +33,8 @@ public class ChangeNameTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Petr-19",
-                        "password":"Petr_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // change name
@@ -53,8 +53,8 @@ public class ChangeNameTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Petr-19",
-                        "password":"Petr_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // change name

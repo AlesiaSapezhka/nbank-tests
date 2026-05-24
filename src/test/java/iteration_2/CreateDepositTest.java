@@ -24,39 +24,43 @@ public class CreateDepositTest {
 
     }
 
-    public static Stream<Arguments> depositInvalidData() {
-        return Stream.of(Arguments.of(-500.0), Arguments.of(50000.0), Arguments.of(500.7));
+    public static Stream<Arguments> depositValidData() {
+        return Stream.of(Arguments.of(0.01), Arguments.of(5000), Arguments.of(4999.99));
     }
 
-    @Test
-    public void userCanCreateDepositWithValidDataTest() {
-        // take User Token
+    public static Stream<Arguments> depositInvalidData() {
+        return Stream.of(Arguments.of(-500.0), Arguments.of(5000.01));
+    }
+
+    @MethodSource("depositValidData")
+    @ParameterizedTest
+    public void userCanCreateDepositWithValidDataTest(double deposit) {
+
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
-                                }
-                """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
-        // create account and take it id
-        int accountId = given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).post("http://localhost:4111/api/v1/accounts").then().assertThat().statusCode(HttpStatus.SC_CREATED).extract().path("id");
-        // add deposit
+                    "username":"mike-1998",
+                    "password":"verysTRongPassword33$"
+                }
+                """).post("http://localhost:4111/api/v1/auth/login").then().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
+
+        int accountId = given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).post("http://localhost:4111/api/v1/accounts").then().statusCode(HttpStatus.SC_CREATED).extract().path("id");
+
         given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
                     "id": %s,
-                    "balance": 100
+                    "balance": %s
                 }
-                """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/deposit").then().assertThat().statusCode(HttpStatus.SC_OK).body("id", Matchers.equalTo(accountId)).body("balance", Matchers.equalTo(100.0f));
+                """.formatted(accountId, deposit)).post("http://localhost:4111/api/v1/accounts/deposit").then().statusCode(HttpStatus.SC_OK).body("id", Matchers.equalTo(accountId)).body("balance", Matchers.equalTo((float) deposit));
     }
 
-    // В условиях сказано что нельзя пополнить баланс более чем на 5000, негативное значение, а про дробное значение не сказано в условиях
     @MethodSource("depositInvalidData")
     @ParameterizedTest
     public void userCanNotCreateDepositWithInvalidDataTest(double deposit) {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // create account and take it id
@@ -75,8 +79,8 @@ public class CreateDepositTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // add deposit

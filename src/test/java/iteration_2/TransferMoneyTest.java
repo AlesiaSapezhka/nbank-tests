@@ -28,8 +28,8 @@ public class TransferMoneyTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // create account and take it id
@@ -38,17 +38,17 @@ public class TransferMoneyTest {
         given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
                     "id": %s,
-                    "balance": 1000
+                    "balance": 10000
                 }
-                """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/deposit").then().assertThat().statusCode(HttpStatus.SC_OK).body("id", Matchers.equalTo(accountId)).body("balance", Matchers.equalTo(1000.0f));
+                """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/deposit").then().assertThat().statusCode(HttpStatus.SC_OK).body("id", Matchers.equalTo(accountId)).body("balance", Matchers.equalTo(10000.0f));
         // transfer money
         given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
                   "senderAccountId": %s,
                   "receiverAccountId": 3,
-                  "amount": 100
+                  "amount": 0.01
                 }
-                """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_OK).body("senderAccountId", Matchers.equalTo(accountId)).body("message", Matchers.equalTo("Transfer successful")).body("amount", Matchers.equalTo(100.0f)).body("receiverAccountId", Matchers.equalTo(3));
+                """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_OK).body("senderAccountId", Matchers.equalTo(accountId)).body("message", Matchers.equalTo("Transfer successful")).body("amount", Matchers.equalTo(0.01f)).body("receiverAccountId", Matchers.equalTo(3));
     }
 
     // Получилось отправить со своего же аккаунта деньги, senderAccount=receiverAccount
@@ -57,8 +57,8 @@ public class TransferMoneyTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // create account and take it id
@@ -85,8 +85,8 @@ public class TransferMoneyTest {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // create account and take it id
@@ -108,19 +108,18 @@ public class TransferMoneyTest {
                 """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST).body(Matchers.equalTo("Invalid transfer: insufficient funds or invalid accounts"));
     }
 
-
     public static Stream<Arguments> transferInvalidData() {
-        return Stream.of(Arguments.of(-500), Arguments.of(12000), Arguments.of(2000));
+        return Stream.of(Arguments.of(-500), Arguments.of(10000.01), Arguments.of(2000));
     }
 
     @MethodSource("transferInvalidData")
     @ParameterizedTest
-    public void userCanNotTransferInvalidAmountOfMoneyToValidAccountTest(int transferAmount) {
+    public void userCanNotTransferInvalidAmountOfMoneyToValidAccountTest(double transferAmount) {
         // take User Token
         String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
+                        "username":"mike-1998",
+                        "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
         // create account and take it id
