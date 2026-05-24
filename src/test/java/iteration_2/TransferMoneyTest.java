@@ -16,11 +16,17 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 
 public class TransferMoneyTest {
     @BeforeAll
     public static void setUpRestAssured() {
         RestAssured.filters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter()));
+    }
+
+    public static Stream<Arguments> transferInvalidData() {
+        return Stream.of(Arguments.of(-500), Arguments.of(10000.01), Arguments.of(2000));
     }
 
     @Test
@@ -49,9 +55,10 @@ public class TransferMoneyTest {
                   "amount": 0.01
                 }
                 """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_OK).body("senderAccountId", Matchers.equalTo(accountId)).body("message", Matchers.equalTo("Transfer successful")).body("amount", Matchers.equalTo(0.01f)).body("receiverAccountId", Matchers.equalTo(3));
+        // get all transactions and check existing
+        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount", hasItem(0.01f)).body("type", hasItem("TRANSFER_OUT"));
     }
 
-    // Получилось отправить со своего же аккаунта деньги, senderAccount=receiverAccount
     @Test
     public void userCanTransferValidAmountOfMoneyToTheSameAccountTest() {
         // take User Token
@@ -77,7 +84,9 @@ public class TransferMoneyTest {
                   "receiverAccountId": %s,
                   "amount": 100
                 }
-                """.formatted(accountId,accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_OK).body("senderAccountId", Matchers.equalTo(accountId)).body("message", Matchers.equalTo("Transfer successful")).body("amount", Matchers.equalTo(100.0f)).body("receiverAccountId", Matchers.equalTo(accountId));
+                """.formatted(accountId, accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_OK).body("senderAccountId", Matchers.equalTo(accountId)).body("message", Matchers.equalTo("Transfer successful")).body("amount", Matchers.equalTo(100.0f)).body("receiverAccountId", Matchers.equalTo(accountId));
+        // get all transactions and check existing
+        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount", hasItem(100f)).body("type", hasItem("DEPOSIT"));
     }
 
     @Test
@@ -103,13 +112,11 @@ public class TransferMoneyTest {
                 {
                   "senderAccountId": %s,
                   "receiverAccountId": 123,
-                  "amount": 100
+                  "amount": 199
                 }
                 """.formatted(accountId)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST).body(Matchers.equalTo("Invalid transfer: insufficient funds or invalid accounts"));
-    }
-
-    public static Stream<Arguments> transferInvalidData() {
-        return Stream.of(Arguments.of(-500), Arguments.of(10000.01), Arguments.of(2000));
+        // get all transactions and check not existing
+        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount", not(hasItem(199f)));
     }
 
     @MethodSource("transferInvalidData")
@@ -139,5 +146,7 @@ public class TransferMoneyTest {
                   "amount": %s
                 }
                 """.formatted(accountId, transferAmount)).post("http://localhost:4111/api/v1/accounts/transfer").then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST).body(Matchers.equalTo("Invalid transfer: insufficient funds or invalid accounts"));
+        // get all transactions and check not existing
+        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount", not(hasItem(transferAmount)));
     }
 }

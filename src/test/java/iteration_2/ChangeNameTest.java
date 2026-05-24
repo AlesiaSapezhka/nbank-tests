@@ -46,7 +46,7 @@ public class ChangeNameTest {
         //request all users and check that name was updated
         given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/customer/profile").then().assertThat().body("name", equalTo("Ivan Nikolaev"));
     }
-
+    // Получилось поменять имя на чисто символы, чего не должно быть
     @MethodSource("invalidNames")
     @ParameterizedTest
     public void userCanNotChangePersonalInfoWithInvalidDataTest(String invalidName) {
@@ -57,6 +57,15 @@ public class ChangeNameTest {
                         "password":"verysTRongPassword33$"
                                 }
                 """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
+        // get current name BEFORE update
+        String initialName =
+                given()
+                        .header("Authorization", userAuthHeader)
+                        .get("http://localhost:4111/api/v1/customer/profile")
+                        .then()
+                        .statusCode(HttpStatus.SC_OK)
+                        .extract()
+                        .path("name");
         // change name
         given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
                 {
@@ -64,6 +73,6 @@ public class ChangeNameTest {
                 }
                 """.formatted(invalidName)).put("http://localhost:4111/api/v1/customer/profile").then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST);
         //request all users and check that there name was not updated
-        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/customer/profile").then().assertThat().body("name", not(equalTo(invalidName)));
+        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/customer/profile").then().assertThat().body("name", equalTo(initialName)).body("name", not(equalTo(invalidName)));
     }
 }
