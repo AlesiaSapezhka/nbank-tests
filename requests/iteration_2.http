@@ -3,7 +3,7 @@
 ### Positive test: Authorized user can add deposit less than 5000
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic YWRtaW46YWRtaW4=
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "id": 1,
@@ -13,37 +13,58 @@ Authorization: Basic YWRtaW46YWRtaW4=
 ### Positive test: Authorized user can add deposit amount equal 5000
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "id": 2,
+  "id": 1,
   "balance": 5000
 }
+
+### Positive test: Authorized user can add deposit amount less than 5000
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
+
+{
+  "id": 1,
+  "balance": 4999.99
+}
+
+### Positive test: Authorized user can add deposit amount less than 5000
+POST http://localhost:4111/api/v1/accounts/deposit
+Content-Type: application/json
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
+
+{
+  "id": 1,
+  "balance": 0.01
+}
+
 
 ### Negative test: Authorized user can not add deposit amount more than 5000
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "id": 2,
-  "balance": 5200
+  "id": 1,
+  "balance": 5000.01
 }
 
 ### Negative test: Authorized user can not add negative deposit amount
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "id": 2,
+  "id": 1,
   "balance": -200
 }
 
 ### Negative test: Authorized user can not add deposit to not existing account
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "id": 24,
@@ -53,7 +74,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Negative test: Authorized user can not add deposit to account of another user
 POST http://localhost:4111/api/v1/accounts/deposit
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "id": 3,
@@ -65,67 +86,77 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Positive test: Authorized user can transfer money to another account
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxleC0xODpBbGV4XzAwMCM=
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "senderAccountId": 1,
   "receiverAccountId": 2,
-  "amount": 10
+  "amount": 9999.99
+}
+
+### Positive test: Authorized user can transfer money to another account
+POST http://localhost:4111/api/v1/accounts/transfer
+Content-Type: application/json
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
+
+{
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 0.01
 }
 
 ### Negative test: Authorized user cannot transfer money to another account more than 10000
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "senderAccountId": 2,
-  "receiverAccountId": 3,
-  "amount": 10000
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
+  "amount": 10000.01
 }
 
 ### Negative test: Authorized user cannot transfer money to another account exceed personal account balance
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "senderAccountId": 2,
-  "receiverAccountId": 3,
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
   "amount": 8000
 }
 
 ### Negative test: Authorized user cannot transfer negative ammount of money to another account
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "senderAccountId": 2,
-  "receiverAccountId": 3,
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
   "amount": -900
 }
 
 ### Positive test: Authorized user can transfer money to another personal account
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "senderAccountId": 2,
-  "receiverAccountId": 1,
+  "senderAccountId": 1,
+  "receiverAccountId": 2,
   "amount": 900
 }
-
 
 ### Negative test: Authorized user can not transfer money to not existing account
 POST http://localhost:4111/api/v1/accounts/transfer
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
-  "senderAccountId": 112,
-  "receiverAccountId": 1,
+  "senderAccountId": 1,
+  "receiverAccountId": 12,
   "amount": 900
 }
 
@@ -134,7 +165,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Positive test: Authorized user can change user name with valid name
 PUT http://localhost:4111/api/v1/customer/profile
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "name": "Alice Ivanova"
@@ -143,7 +174,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Negative test: Authorized user can not change user name with name length more than 2 words
 PUT http://localhost:4111/api/v1/customer/profile
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "name": "Alice Ivanova Petrovna"
@@ -152,7 +183,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Negative test: Authorized user can not change user name without letters, only digits
 PUT http://localhost:4111/api/v1/customer/profile
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "name": "4567 8790"
@@ -161,7 +192,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Negative test: Authorized user can not change user name without letters, only symbols
 PUT http://localhost:4111/api/v1/customer/profile
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 {
   "name": "&*^%$"
@@ -171,7 +202,7 @@ Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
 ### Positive test: Authorized user can get profile info
 GET http://localhost:4111/api/v1/customer/profile
 Content-Type: application/json
-Authorization: Basic QWxpY2UxOTk3Om15U1RST05HUGFzc3dvcmQxOTk3JA==
+Authorization: Basic dGVzdHVzZXI6c3RvbmdQYXNzd29yZDQ1XyM=
 
 
 
