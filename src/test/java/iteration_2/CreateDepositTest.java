@@ -1,100 +1,85 @@
 package iteration_2;
 
-import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.http.ContentType;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import generators.RandomData;
+import iteration_1.BaseTest;
+import models.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import requests.post_requests.AdminCreateUserRequester;
+import requests.post_requests.CreateAccountRequester;
+import requests.post_requests.DepositRequester;
+import requests.get_requests.GetTransactionsRequester;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static specs.ResponseSpecs.entityWasCreated;
 
-public class CreateDepositTest {
-    @BeforeAll
-    public static void setUpRestAssured() {
-        RestAssured.filters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter()));
-
-    }
+public class CreateDepositTest extends BaseTest {
 
     public static Stream<Arguments> depositValidData() {
         return Stream.of(Arguments.of(0.01), Arguments.of(5000), Arguments.of(4999.99));
     }
 
     public static Stream<Arguments> depositInvalidData() {
-        return Stream.of(Arguments.of(-500.0), Arguments.of(5000.01));
+        return Stream.of(Arguments.of(-500.0), Arguments.of(5000.01), Arguments.of(0));
     }
 
     @MethodSource("depositValidData")
     @ParameterizedTest
     public void userCanCreateDepositWithValidDataTest(double deposit) {
-        // take User Token
-        String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                    "username":"mike-1998",
-                    "password":"verysTRongPassword33$"
-                }
-                """).post("http://localhost:4111/api/v1/auth/login").then().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
+        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+        new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
+
         // create account and take it id
-        int accountId = given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).post("http://localhost:4111/api/v1/accounts").then().statusCode(HttpStatus.SC_CREATED).extract().path("id");
+        int accountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+
         // add deposit
-        given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                    "id": %s,
-                    "balance": %s
-                }
-                """.formatted(accountId, deposit)).post("http://localhost:4111/api/v1/accounts/deposit").then().statusCode(HttpStatus.SC_OK).body("id", Matchers.equalTo(accountId)).body("balance", Matchers.equalTo((float) deposit));
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
+
+        CreateDepositResponse createDepositResponse = new DepositRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).post(createDepositRequest).extract().as(CreateDepositResponse.class);
+
+        softly.assertThat(createDepositResponse.getId()).isEqualTo(accountId);
+        softly.assertThat(createDepositResponse.getBalance()).isEqualTo(createDepositRequest.getBalance());
+        softly.assertThat(createDepositResponse.getTransactions().get(0).getType()).isEqualTo(TransactionsTypes.DEPOSIT);
+
         // get all transactions and check existing
-        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount.flatten()", hasItem((float) deposit)).body("type", hasItem("DEPOSIT"));
+        new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsDepositDetails(createDepositResponse.getTransactions().get(0).getAmount(), createDepositResponse.getTransactions().get(0).getType())).get(accountId);
+
     }
 
     @MethodSource("depositInvalidData")
     @ParameterizedTest
     public void userCanNotCreateDepositWithInvalidDataTest(double deposit) {
-        // take User Token
-        String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                        "username":"mike-1998",
-                        "password":"verysTRongPassword33$"
-                                }
-                """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
+        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+        LoginUserRequest loginUserRequest = LoginUserRequest.builder().username(userRequest.getUsername()).password(userRequest.getPassword()).build();
+
+        new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
+
         // create account and take it id
-        int accountId = given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).post("http://localhost:4111/api/v1/accounts").then().assertThat().statusCode(HttpStatus.SC_CREATED).extract().path("id");
+        int accountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+
         // add deposit
-        given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                    "id": %s,
-                    "balance":  %s
-                }
-                """.formatted(accountId, deposit)).post("http://localhost:4111/api/v1/accounts/deposit").then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST).body(Matchers.equalTo("Invalid account or amount"));
-        // get all transactions and check not existing
-        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/accounts/{accountId}/transactions", accountId).then().body("amount.flatten()", not(hasItem((float) deposit)));
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
+        new DepositRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey("Invalid account or amount")).post(createDepositRequest);
     }
 
     @Test
     public void userCanNotCreateDepositForNotExistingAccountTest() {
-        // take User Token
-        String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                        "username":"mike-1998",
-                        "password":"verysTRongPassword33$"
-                                }
-                """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
-        // add deposit
-        given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                    "id": 134,
-                    "balance":  688
-                }
-                """).post("http://localhost:4111/api/v1/accounts/deposit").then().assertThat().statusCode(HttpStatus.SC_FORBIDDEN).body(Matchers.equalTo("Unauthorized access to account"));
+        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+        LoginUserRequest loginUserRequest = LoginUserRequest.builder().username(userRequest.getUsername()).password(userRequest.getPassword()).build();
+
+        new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
+
+        // create account
+        new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+
+        // add deposit to unexisting Id
+        int invalidAccountId = 134;
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(invalidAccountId).balance(RandomData.getRandomAmount(100, 200)).build();
+        new DepositRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsForbiddenRequestWithoutKey("Unauthorized access to account")).post(createDepositRequest);
     }
 }

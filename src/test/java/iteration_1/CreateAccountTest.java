@@ -1,46 +1,29 @@
 package iteration_1;
 
-import io.restassured.RestAssured;
-import io.restassured.filter.log.RequestLoggingFilter;
-import io.restassured.filter.log.ResponseLoggingFilter;
-import io.restassured.http.ContentType;
-import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.BeforeAll;
+import generators.RandomData;
+import models.CreateAccountResponse;
+import models.CreateUserRequest;
+import models.LoginUserRequest;
+import models.UserRole;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
+import requests.post_requests.AdminCreateUserRequester;
+import requests.post_requests.CreateAccountRequester;
+import requests.get_requests.GetAccountsRequester;
+import specs.RequestSpecs;
+import specs.ResponseSpecs;
 
 public class CreateAccountTest {
-    @BeforeAll
-    public static void setUpRestAssured() {
-        RestAssured.filters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter()));
-
-    }
-
     @Test
     public void userCanCreateAccountTest() {
-        // create user
-        given().contentType(ContentType.JSON).accept(ContentType.JSON).header("Authorization", "Basic YWRtaW46YWRtaW4=").body("""
-                {
-                        "username": "Alex-18",
-                        "password": "Alex_000#",
-                        "role": "USER"
-                        }
-                """).post("http://localhost:4111/api/v1/admin/users").then().assertThat().statusCode(HttpStatus.SC_CREATED);
-        // take User Token
-        String userAuthHeader = given().contentType(ContentType.JSON).accept(ContentType.JSON).body("""
-                {
-                        "username":"Alex-18",
-                        "password":"Alex_000#"
-                                }
-                """).post("http://localhost:4111/api/v1/auth/login").then().assertThat().statusCode(HttpStatus.SC_OK).extract().header("Authorization");
-        // create account
-        given().header("Authorization", userAuthHeader).contentType(ContentType.JSON).accept(ContentType.JSON).post("http://localhost:4111/api/v1/accounts").then().assertThat().statusCode(HttpStatus.SC_CREATED);
-        //запросить все аккаунты и проверить что он там есть
-        given().header("Authorization", userAuthHeader).get("http://localhost:4111/api/v1/customer/accounts").then().assertThat().body("[0].id", equalTo(8)).body("[0].accountNumber", equalTo("ACC8"));
+        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+
+        LoginUserRequest loginUserRequest = LoginUserRequest.builder().username(userRequest.getUsername()).password(userRequest.getPassword()).build();
+
+        new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated()).post(userRequest);
+
+        CreateAccountResponse accountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.entityWasCreated()).post(null).extract().as(CreateAccountResponse.class);
+        // get all accounts and check existing of account created above
+        new GetAccountsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsAccountIdAndNumber(accountResponse.getId(), accountResponse.getAccountNumber())).get(null);
     }
 
 }
