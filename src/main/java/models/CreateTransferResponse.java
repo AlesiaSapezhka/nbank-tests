@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 
-public class CreateTransferResponse {
+public class CreateTransferResponse extends BaseModel{
     private int senderAccountId;
     private int receiverAccountId;
     private double amount;

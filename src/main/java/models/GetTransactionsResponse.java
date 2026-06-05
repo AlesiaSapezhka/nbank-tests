@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetTransactionsResponse {
+public class GetTransactionsResponse extends BaseModel {
     private int id;
     private double amount;
     private TransactionsTypes type;
