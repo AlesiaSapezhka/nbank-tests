@@ -30,6 +30,9 @@ public enum Endpoint {
     ),
     TRANSFER(
             "/accounts/transfer", CreateTransferRequest.class, CreateTransferResponse.class
+    ),
+    UPDATE_PROFILE(
+            "/customer/profile", UpdateProfileRequest.class, UpdateProfileResponse.class
     );
 
 

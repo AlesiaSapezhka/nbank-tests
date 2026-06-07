@@ -1,6 +1,5 @@
 package requests.skeleton.requesters;
 
-import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -34,8 +33,10 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
     }
 
     @Override
-    public Object update(int id, BaseModel model) {
-        return null;
+    public Object update( BaseModel model) {
+
+        var body = model == null ? "" : model;
+        return given().spec(requestSpecification).body(body).put(endpoint.getUrl()).then().spec(responseSpecification);
     }
 
     @Override
