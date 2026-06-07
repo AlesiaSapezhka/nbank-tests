@@ -36,7 +36,7 @@ public class ChangeNameTest extends BaseTest {
         softly.assertThat(updateProfileResponse.getMessage()).isEqualTo(PROFILE_UPDATED);
 
         //request profile info and check that name was updated
-        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(null).extract().as(CreateUserResponse.class);
+        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get().extract().as(CreateUserResponse.class);
         softly.assertThat(users.getName()).isEqualTo(newName.getName());
     }
 
@@ -54,7 +54,7 @@ public class ChangeNameTest extends BaseTest {
         softly.assertThat(updateProfileResponse.getCustomer().getName()).isNull();
 
         //request all users and check that name was not updated (returns initial null value)
-        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(null).extract().as(CreateUserResponse.class);
+        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get().extract().as(CreateUserResponse.class);
         softly.assertThat(users.getName()).isEqualTo(null);
 
     }

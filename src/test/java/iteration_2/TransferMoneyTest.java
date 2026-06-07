@@ -31,9 +31,12 @@ public class TransferMoneyTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account and take it id
-        int senderAccountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse senderAccountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int senderAccountId = senderAccountResponse.getId();
+
         // create receiver account and take it id
-        int receiverAccountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse receiverAccountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int receiverAccountId = receiverAccountResponse.getId();
 
         // add deposit
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
@@ -61,7 +64,8 @@ public class TransferMoneyTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account and take it id
-        int senderAccountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse accountResponse1 = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int senderAccountId = accountResponse1.getId();
 
         // add deposit
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 3000)).build();
@@ -70,7 +74,7 @@ public class TransferMoneyTest extends BaseTest {
         // transfer money
         int InvalidReceiverId = 987;
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(InvalidReceiverId).amount(RandomData.getRandomAmount(100, 500)).build();
-        new TransferRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey("Invalid transfer: insufficient funds or invalid accounts")).post(createTransferRequest);
+        new TransferRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey(ResponseSpecs.INVALID_TRANSFER)).post(createTransferRequest);
 
         // get all transactions
         List<GetTransactionsResponse> transactions = new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(senderAccountId).extract().jsonPath().getList("", GetTransactionsResponse.class);
@@ -85,9 +89,12 @@ public class TransferMoneyTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account and take it id
-        int senderAccountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse senderAccountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int senderAccountId = senderAccountResponse.getId();
+
         // create receiver account and take it id
-        int receiverAccountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse receiverAccountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int receiverAccountId = receiverAccountResponse.getId();
 
         // add deposit
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(100, 200)).build();

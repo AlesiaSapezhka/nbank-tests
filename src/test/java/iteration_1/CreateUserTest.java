@@ -40,7 +40,7 @@ public class CreateUserTest extends BaseTest {
         softly.assertThat(createUserRequest.getRole()).isEqualTo(createUserResponse.getRole());
 
         // get all users and check existing of user created above
-        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get(null).extract().jsonPath().getList("", CreateUserResponse.class);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get().extract().jsonPath().getList("", CreateUserResponse.class);
         softly.assertThat(users)
                 .extracting(CreateUserResponse::getUsername)
                 .contains(username);
@@ -58,7 +58,7 @@ public class CreateUserTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue)).post(createUserRequest);
 
         // get all users and check NOT existing of user created above
-        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get(null).extract().jsonPath().getList("", CreateUserResponse.class);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get().extract().jsonPath().getList("", CreateUserResponse.class);
         softly.assertThat(users)
                 .extracting(CreateUserResponse::getUsername)
                 .doesNotContain(username);

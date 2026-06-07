@@ -14,5 +14,7 @@ public abstract class GetRequest<T> {
     }
 
     public abstract ValidatableResponse get(T request);
-
+    public ValidatableResponse get(){
+        return get(null);
+    };
 }

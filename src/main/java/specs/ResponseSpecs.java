@@ -19,10 +19,15 @@ public class ResponseSpecs {
 
     public static final String TRANSFER_SUCCESSFUL =
             "Transfer successful";
+
     public static final String TRANSFER_UNSUCCESSFUL =
             "Invalid transfer: insufficient funds or invalid accounts";
+
     public static final String UNAUTHORIZED_ACCESS =
             "Unauthorized access to account";
+
+    public static final String INVALID_TRANSFER =
+            "Invalid transfer: insufficient funds or invalid account";
 
 
     private static ResponseSpecBuilder defaultResponseBuilder() {

@@ -36,7 +36,8 @@ public class CreateDepositTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account and take it id
-        int accountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse accountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int accountId = accountResponse.getId();
 
         // add deposit
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
@@ -68,7 +69,8 @@ public class CreateDepositTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account and take it id
-        int accountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse accountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int accountId = accountResponse.getId();
 
         // add deposit
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
@@ -88,7 +90,8 @@ public class CreateDepositTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
 
         // create account
-        int accountId = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post(null).extract().path("id");
+        CreateAccountResponse accountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), entityWasCreated()).post().extract().as(CreateAccountResponse.class);
+        int accountId = accountResponse.getId();
 
         // add deposit to unexisting Id
         int invalidAccountId = 134;

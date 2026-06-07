@@ -13,6 +13,10 @@ public abstract class PostRequest<T extends BaseModel> {
         this.requestSpecification = requestSpecification;
         this.responseSpecification = responseSpecification;
     }
-
     public abstract ValidatableResponse post(T model);
+
+    public ValidatableResponse post() {
+        return post(null);
+    }
+
 }
