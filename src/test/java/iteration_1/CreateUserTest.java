@@ -7,12 +7,16 @@ import models.UserRole;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import requests.get_requests.GetCustomerProfileRequester;
 import requests.post_requests.AdminCreateUserRequester;
 import requests.get_requests.AdminGetUsersRequester;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 
+import java.util.List;
 import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.hasItem;
 
 public class CreateUserTest extends BaseTest {
 
@@ -27,7 +31,7 @@ public class CreateUserTest extends BaseTest {
     @MethodSource("userValidData")
     @ParameterizedTest
     public void adminCanCreateUserWithValidDataTest(String username, String password, String role, int statusCode) {
-        CreateUserRequest createUserRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+        CreateUserRequest createUserRequest = CreateUserRequest.builder().username(username).password(password).role(role).build();
 
         CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated()).post(createUserRequest).extract().as(CreateUserResponse.class);
 
@@ -36,8 +40,14 @@ public class CreateUserTest extends BaseTest {
         softly.assertThat(createUserRequest.getRole()).isEqualTo(createUserResponse.getRole());
 
         // get all users and check existing of user created above
-        new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsUsersList(createUserRequest.getUsername(), createUserRequest.getRole())).get(null);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get(null).extract().jsonPath().getList("", CreateUserResponse.class);
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getUsername)
+                .contains(username);
 
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getRole)
+                .contains(role);
     }
 
     @MethodSource("userInvalidData")
@@ -48,6 +58,9 @@ public class CreateUserTest extends BaseTest {
         new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue)).post(createUserRequest);
 
         // get all users and check NOT existing of user created above
-        new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsUsersListWithoutUser(createUserRequest.getUsername())).get(null);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get(null).extract().jsonPath().getList("", CreateUserResponse.class);
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getUsername)
+                .doesNotContain(username);
     }
 }

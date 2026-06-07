@@ -30,11 +30,14 @@ public class ChangeNameTest extends BaseTest {
 
         // change name
         UpdateProfileRequest newName = UpdateProfileRequest.builder().name(RandomData.getUserName()).build();
-        UpdateProfileResponse updateProfileResponse = new UpdateProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), profileWasUpdated("message", "Profile updated successfully")).put(newName).extract().as(UpdateProfileResponse.class);
+        UpdateProfileResponse updateProfileResponse = new UpdateProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), requestReturnsOK()).put(newName).extract().as(UpdateProfileResponse.class);
+
         softly.assertThat(updateProfileResponse.getCustomer().getName()).isEqualTo(newName.getName());
+        softly.assertThat(updateProfileResponse.getMessage()).isEqualTo(PROFILE_UPDATED);
 
         //request profile info and check that name was updated
-        new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsUserProfile(newName.getName())).get(null);
+        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(null).extract().as(CreateUserResponse.class);
+        softly.assertThat(users.getName()).isEqualTo(newName.getName());
     }
 
 
@@ -51,6 +54,8 @@ public class ChangeNameTest extends BaseTest {
         softly.assertThat(updateProfileResponse.getCustomer().getName()).isNull();
 
         //request all users and check that name was not updated (returns initial null value)
-        new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsNull()).get(null);
+        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(null).extract().as(CreateUserResponse.class);
+        softly.assertThat(users.getName()).isEqualTo(null);
+
     }
 }

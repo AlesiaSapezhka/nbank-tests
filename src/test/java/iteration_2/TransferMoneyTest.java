@@ -46,16 +46,13 @@ public class TransferMoneyTest extends BaseTest {
         softly.assertThat(transferResponse.getSenderAccountId()).isEqualTo(senderAccountId);
         softly.assertThat(transferResponse.getReceiverAccountId()).isEqualTo(receiverAccountId);
         softly.assertThat(transferResponse.getAmount()).isEqualTo(createTransferRequest.getAmount());
-        softly.assertThat(transferResponse.getMessage()).isEqualTo("Transfer successful");
+        softly.assertThat(transferResponse.getMessage()).isEqualTo(ResponseSpecs.TRANSFER_SUCCESSFUL);
 
         // get all transactions
         List<GetTransactionsResponse> transactions = new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(senderAccountId).extract().jsonPath().getList("", GetTransactionsResponse.class);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(createTransferRequest.getAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.TRANSFER_OUT);
 
-        // Find current transaction
-        GetTransactionsResponse transferTransaction = transactions.stream().filter(t -> t.getType() == TransactionsTypes.TRANSFER_OUT).findFirst().orElseThrow(() -> new AssertionError("Transfer transaction not found"));
-
-        // Take all transactions via Get and check existing ours
-        new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsTransactionsDetails(transferTransaction.getAmount(), transferTransaction.getType())).get(senderAccountId);
     }
 
     @Test
@@ -74,6 +71,10 @@ public class TransferMoneyTest extends BaseTest {
         int InvalidReceiverId = 987;
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(InvalidReceiverId).amount(RandomData.getRandomAmount(100, 500)).build();
         new TransferRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey("Invalid transfer: insufficient funds or invalid accounts")).post(createTransferRequest);
+
+        // get all transactions
+        List<GetTransactionsResponse> transactions = new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(senderAccountId).extract().jsonPath().getList("", GetTransactionsResponse.class);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createTransferRequest.getAmount());
 
     }
 
@@ -94,12 +95,12 @@ public class TransferMoneyTest extends BaseTest {
 
         // transfer money
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(transferAmount).build();
-        new TransferRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey("Invalid transfer: insufficient funds or invalid accounts")).post(createTransferRequest);
+        new TransferRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsBadRequestWithoutKey(ResponseSpecs.TRANSFER_UNSUCCESSFUL)).post(createTransferRequest);
 
-        // get all transactions
+        // get all transactions and check Not existing ours
         List<GetTransactionsResponse> transactions = new GetTransactionsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get(senderAccountId).extract().jsonPath().getList("", GetTransactionsResponse.class);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(transferAmount);
 
-        // Take all transactions and check Not existing ours
-        softly.assertThat(transactions).noneMatch(t -> t.getAmount() == transferAmount && t.getType() == TransactionsTypes.TRANSFER_OUT && t.getRelatedAccountId() == receiverAccountId);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).doesNotContain(TransactionsTypes.TRANSFER_OUT);
     }
 }
