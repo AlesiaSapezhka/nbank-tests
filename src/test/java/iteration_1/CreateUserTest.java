@@ -1,22 +1,27 @@
 package iteration_1;
 
+import generators.RandomData;
 import models.CreateUserRequest;
 import models.CreateUserResponse;
+import models.UserRole;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import requests.skeleton.Endpoint;
-import requests.skeleton.requesters.CrudRequester;
-import requests.skeleton.requesters.ValidatedCrudRequester;
+import requests.get_requests.GetCustomerProfileRequester;
+import requests.post_requests.AdminCreateUserRequester;
+import requests.get_requests.AdminGetUsersRequester;
 import specs.RequestSpecs;
 import specs.ResponseSpecs;
 
+import java.util.List;
 import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.hasItem;
 
 public class CreateUserTest extends BaseTest {
 
     public static Stream<Arguments> userValidData() {
-        return Stream.of(Arguments.of("Alex.1", "Alex_16&#", "USER", 201), Arguments.of("Alex-1", "Alex_16&#", "USER", 201), Arguments.of("Alice_1", "Alex_16&#", "USER", 201));
+        return Stream.of(Arguments.of("Alex.10", "Alex_16&#", "USER", 201), Arguments.of("Alex-10", "Alex_16&#", "USER", 201), Arguments.of("Alice_10", "Alex_16&#", "USER", 201));
     }
 
     public static Stream<Arguments> userInvalidData() {
@@ -28,38 +33,34 @@ public class CreateUserTest extends BaseTest {
     public void adminCanCreateUserWithValidDataTest(String username, String password, String role, int statusCode) {
         CreateUserRequest createUserRequest = CreateUserRequest.builder().username(username).password(password).role(role).build();
 
-        CreateUserResponse createUserResponse = new ValidatedCrudRequester<CreateUserResponse>
-                (RequestSpecs.adminSpec(),
-                        Endpoint.ADMIN_USER,
-                        ResponseSpecs.entityWasCreated())
-                .post(createUserRequest);
+        CreateUserResponse createUserResponse = new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated()).post(createUserRequest).extract().as(CreateUserResponse.class);
 
         softly.assertThat(createUserRequest.getUsername()).isEqualTo(createUserResponse.getUsername());
         softly.assertThat(createUserRequest.getPassword()).isNotEqualTo(createUserResponse.getPassword());
         softly.assertThat(createUserRequest.getRole()).isEqualTo(createUserResponse.getRole());
 
         // get all users and check existing of user created above
-         new CrudRequester
-                (RequestSpecs.adminSpec(),
-                        Endpoint.ADMIN_USER,
-                        ResponseSpecs.requestReturnsUsersList(username, role))
-                .get(null);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get().extract().jsonPath().getList("", CreateUserResponse.class);
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getUsername)
+                .contains(username);
+
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getRole)
+                .contains(role);
     }
 
     @MethodSource("userInvalidData")
     @ParameterizedTest
     public void adminCanNotCreateUserWithInvalidDataTest(String username, String password, String role, String errorKey, String errorValue) {
         CreateUserRequest createUserRequest = CreateUserRequest.builder().username(username).password(password).role(role).build();
-        new CrudRequester(RequestSpecs.adminSpec(),
-                        Endpoint.ADMIN_USER,
-                        ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue))
-                .post(createUserRequest);
+
+        new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsBadRequest(errorKey, errorValue)).post(createUserRequest);
 
         // get all users and check NOT existing of user created above
-        new CrudRequester
-                (RequestSpecs.adminSpec(),
-                        Endpoint.ADMIN_USER,
-                        ResponseSpecs.requestReturnsUsersListWithoutUser(createUserRequest.getUsername()))
-                .get(null);
+        List<CreateUserResponse> users = new AdminGetUsersRequester(RequestSpecs.adminSpec(), ResponseSpecs.requestReturnsOK()).get().extract().jsonPath().getList("", CreateUserResponse.class);
+        softly.assertThat(users)
+                .extracting(CreateUserResponse::getUsername)
+                .doesNotContain(username);
     }
 }
