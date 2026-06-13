@@ -1,35 +1,23 @@
 package iteration_1;
 
-import generators.RandomData;
-import models.*;
+import models.CreateAccountResponse;
+import models.CreateUserRequest;
 import org.junit.jupiter.api.Test;
-import requests.post_requests.AdminCreateUserRequester;
-import requests.post_requests.CreateAccountRequester;
-import requests.get_requests.GetAccountsRequester;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
+import requests.steps.AdminSteps;
+import requests.steps.UserSteps;
 
 import java.util.List;
 
-public class CreateAccountTest extends BaseTest{
+public class CreateAccountTest extends BaseTest {
     @Test
     public void userCanCreateAccountTest() {
-        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
 
-        new AdminCreateUserRequester(RequestSpecs.adminSpec(), ResponseSpecs.entityWasCreated()).post(userRequest);
+        CreateUserRequest userRequest = AdminSteps.createUser();
+        CreateAccountResponse createAccountResponse = UserSteps.createAccount(userRequest.getUsername(), userRequest.getPassword());
 
-        CreateAccountResponse accountResponse = new CreateAccountRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.entityWasCreated()).post().extract().as(CreateAccountResponse.class);
-        // get all accounts and check existing of account created above
+        List<CreateAccountResponse> accounts = UserSteps.getAllAccountsList(userRequest.getUsername(), userRequest.getPassword());
 
-        List<CreateAccountResponse> accounts = new GetAccountsRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get().extract().jsonPath().getList("", CreateAccountResponse.class);;
-        softly.assertThat(accounts)
-                .extracting(CreateAccountResponse::getId)
-                .contains(accountResponse.getId());
-
-        softly.assertThat(accounts)
-                .extracting(CreateAccountResponse::getAccountNumber)
-                .contains(accountResponse.getAccountNumber());
-
+        softly.assertThat(accounts).extracting(CreateAccountResponse::getId).contains(createAccountResponse.getId());
+        softly.assertThat(accounts).extracting(CreateAccountResponse::getAccountNumber).contains(createAccountResponse.getAccountNumber());
     }
-
 }

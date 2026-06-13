@@ -1,33 +1,30 @@
 package iteration_1;
 
-import generators.RandomData;
-import models.CreateUserRequest;
-import models.CreateUserResponse;
-import models.LoginUserRequest;
-import models.UserRole;
-import org.hamcrest.Matchers;
+import models.*;
 import org.junit.jupiter.api.Test;
-import requests.skeleton.Endpoint;
-import requests.skeleton.requesters.CrudRequester;
-import requests.skeleton.requesters.ValidatedCrudRequester;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
+import requests.steps.AdminSteps;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class LoginUserTest {
 
     @Test
     public void adminCanGenerateAuthTokenTest() {
-        LoginUserRequest userRequest = LoginUserRequest.builder().username("admin").password("admin").build();
+        LoginUserRequest userRequest = AdminSteps.createAdmin();
+        LoginUserResponse userResponse = AdminSteps.login(userRequest.getUsername(), userRequest.getPassword());
 
-        new ValidatedCrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(userRequest);
+        assertThat(userResponse.getRole()).isEqualTo(UserRole.ADMIN.toString());
+        assertThat(userResponse.getUsername()).isEqualTo(userRequest.getUsername());
     }
 
     @Test
     public void userCanGenerateAuthTokenTest() {
-        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
+        CreateUserRequest user = AdminSteps.createUser();
+        LoginUserResponse userResponse = AdminSteps.login(user.getUsername(), user.getPassword());
 
-        new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
+        assertThat(userResponse.getRole()).isEqualTo(UserRole.USER.toString());
+        assertThat(userResponse.getUsername()).isEqualTo(user.getUsername());
 
-        new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(userRequest.getUsername()).password(userRequest.getPassword()).build()).header("Authorization", Matchers.notNullValue());
     }
 }

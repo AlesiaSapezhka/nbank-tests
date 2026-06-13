@@ -1,7 +1,6 @@
-package requests.skeleton;
+package requests.skelethon;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import requests.skeleton.interfaces.CrudEndpointInterface;
 
 public abstract class HttpRequests {
     protected RequestSpecification requestSpecification;
@@ -13,6 +12,4 @@ public abstract class HttpRequests {
         this.endpoint = endpoint;
         this.responseSpecification = responseSpecification;
     }
-
-    public abstract Object get(Integer id);
 }

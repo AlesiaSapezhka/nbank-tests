@@ -1,61 +1,49 @@
 package iteration_2;
 
-import generators.RandomData;
 import iteration_1.BaseTest;
 import models.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import requests.get_requests.GetCustomerProfileRequester;
-import requests.post_requests.AdminCreateUserRequester;
-import requests.put_requests.UpdateProfileRequester;
-import specs.RequestSpecs;
-import specs.ResponseSpecs;
+import requests.steps.AdminSteps;
+import requests.steps.UserSteps;
 
 import java.util.stream.Stream;
 
-import static specs.ResponseSpecs.*;
+import static specs.ResponseSpecs.PROFILE_UPDATED;
+
 
 public class ChangeNameTest extends BaseTest {
-    public static Stream<Arguments> invalidNames() {
-        return Stream.of(Arguments.of("Alice Ivanova Petrovna"), Arguments.of("4567 8790"), Arguments.of("&*^%$"));
+    static Stream<Arguments> invalidNames() {
+        return Stream.of(Arguments.of(InvalidChangeNameCase.THREE_WORDS), Arguments.of(InvalidChangeNameCase.DIGITS), Arguments.of(InvalidChangeNameCase.SPECIAL_CHARACTERS));
     }
 
     @Test
     public void userCanChangePersonalInfoWithValidDataTest() {
-        // create User
-        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
-        new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
+        CreateUserRequest user = AdminSteps.createUser();
 
-        // change name
-        UpdateProfileRequest newName = UpdateProfileRequest.builder().name(RandomData.getUserName()).build();
-        UpdateProfileResponse updateProfileResponse = new UpdateProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), requestReturnsOK()).put(newName).extract().as(UpdateProfileResponse.class);
+        UpdateProfileRequest newName = UserSteps.generateValidName();
+        UpdateProfileResponse updateProfileResponse = UserSteps.changeNameValid(user.getUsername(), user.getPassword(), newName);
 
         softly.assertThat(updateProfileResponse.getCustomer().getName()).isEqualTo(newName.getName());
         softly.assertThat(updateProfileResponse.getMessage()).isEqualTo(PROFILE_UPDATED);
 
-        //request profile info and check that name was updated
-        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get().extract().as(CreateUserResponse.class);
-        softly.assertThat(users.getName()).isEqualTo(newName.getName());
+        CreateUserResponse userProfile = UserSteps.getProfileInfo(user.getUsername(), user.getPassword());
+        softly.assertThat(userProfile.getName()).isEqualTo(newName.getName());
     }
 
 
     // Получилось поменять имя на невалидные кейсы
     @MethodSource("invalidNames")
     @ParameterizedTest
-    public void userCanNotChangePersonalInfoWithInvalidDataTest(UpdateProfileRequest invalidName) {
-        // create User
-        CreateUserRequest userRequest = CreateUserRequest.builder().username(RandomData.getUserName()).password(RandomData.getUserPassword()).role(UserRole.USER.toString()).build();
-        new AdminCreateUserRequester(RequestSpecs.adminSpec(), entityWasCreated()).post(userRequest);
+    public void userCanNotChangePersonalInfoWithInvalidDataTest(InvalidChangeNameCase invalidName) {
+        CreateUserRequest user = AdminSteps.createUser();
 
-        // change name
-        UpdateProfileResponse updateProfileResponse = new UpdateProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), requestReturnsBadRequestWithoutMessage()).put(invalidName).extract().as(UpdateProfileResponse.class);
-        softly.assertThat(updateProfileResponse.getCustomer().getName()).isNull();
+        UpdateProfileRequest newName = UserSteps.generateInvalidName(invalidName);
+        UserSteps.changeNameInvalid(user.getUsername(), user.getPassword(), newName);
 
-        //request all users and check that name was not updated (returns initial null value)
-        CreateUserResponse users = new GetCustomerProfileRequester(RequestSpecs.authAsUserSpec(userRequest.getUsername(), userRequest.getPassword()), ResponseSpecs.requestReturnsOK()).get().extract().as(CreateUserResponse.class);
-        softly.assertThat(users.getName()).isEqualTo(null);
-
+        CreateUserResponse userProfile = UserSteps.getProfileInfo(user.getUsername(), user.getPassword());
+        softly.assertThat(userProfile.getName()).isEqualTo(null);
     }
 }

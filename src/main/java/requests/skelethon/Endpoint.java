@@ -1,4 +1,4 @@
-package requests.skeleton;
+package requests.skelethon;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +17,7 @@ public enum Endpoint {
             "/customer/accounts", BaseModel.class, CreateAccountResponse.class
     ),
     CUSTOMER_PROFILE(
-            "/customer/profile", BaseModel.class, CreateAccountResponse.class
+            "/customer/profile", CreateUserRequest.class, CreateUserResponse.class
     ),
     LOGIN(
             "/auth/login", LoginUserRequest.class,LoginUserResponse.class
