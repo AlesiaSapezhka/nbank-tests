@@ -135,7 +135,7 @@ Authorization: Basic YWRtaW46YWRtaW4=
 {
   "username": "Alice1997",
   "password": "mySTRONGPassword1997$",
-  "role" : "EDITOR"
+  "role": "EDITOR"
 }
 
 ### Positive test: Create Account by Authorized User (Alice)
