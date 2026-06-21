@@ -1,7 +1,7 @@
-package iteration_2;
+package iteration_2.api;
 
 import generators.RandomData;
-import iteration_1.BaseTest;
+import iteration_1.api.BaseTest;
 import models.*;
 import models.comparison.ModelAssertions;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class CreateDepositTest extends BaseTest {
         CreateDepositResponse createDepositResponse = UserSteps.createDeposit(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
 
         ModelAssertions.assertThatModels(createDepositRequest, createDepositResponse).match();
-        softly.assertThat(createDepositResponse.getTransactions().get(0).getType()).isEqualTo(TransactionsTypes.DEPOSIT);
+        softly.assertThat(createDepositResponse.getTransactions().getFirst().getType()).isEqualTo(TransactionsTypes.DEPOSIT);
 
         List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(userRequest.getUsername(), userRequest.getPassword(), accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit);
