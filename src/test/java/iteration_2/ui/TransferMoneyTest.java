@@ -42,7 +42,7 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -97,7 +97,7 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -150,7 +150,7 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -203,7 +203,7 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -246,14 +246,14 @@ public class TransferMoneyTest {
     }
     // Успешный кейс, возможно имя не обязательно для заполнения
     @Test
-    public void userCanNotTransferMoneyToIncorrectRecepientNameTest() {
+    public void userCanNotTransferMoneyToIncorrectRecipientNameTest() {
 
         // ШАГИ ПО НАСТРОЙКЕ ОКРУЖЕНИЯ
         // ШАГ 1: админ логинится в банке
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -306,7 +306,6 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -317,15 +316,12 @@ public class TransferMoneyTest {
         CreateAccountResponse receiverAccountData = UserSteps.createAccount(user.getUsername(), user.getPassword());
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
-
         Selenide.open("/");
         executeJavaScript("localStorage.setItem('authToken', arguments[0]);", userAuthHeader);
         Selenide.open("/dashboard");
 
         // ШАГИ ТЕСТА
-        // ШАГ 6: юзер переводит деньги
+        // ШАГ 5: юзер переводит деньги
         $(Selectors.byText("\uD83D\uDD04 Make a Transfer")).click();
 
         $(Selectors.byText("\uD83D\uDD04 Make a Transfer")).shouldBe(Condition.visible);
@@ -338,7 +334,7 @@ public class TransferMoneyTest {
         $("#confirmCheck").setSelected(true);
         $(Selectors.byText("\uD83D\uDE80 Send Transfer")).click();
 
-        // ШАГ 7: проверка, что перевод НЕ осуществлен на UI
+        // ШАГ 6: проверка, что перевод НЕ осуществлен на UI
         Alert alert = switchTo().alert();
         String alertText = alert.getText();
         assertThat(alertText).contains("Please fill all fields and confirm.");
@@ -357,7 +353,7 @@ public class TransferMoneyTest {
         // ШАГ 2: админ создает юзера
         // ШАГ 3: юзер логинится в банке
         // ШАГ 4: юзер создает аккаунт отправителя и получателя
-        // ШАГ 5: юзер отправляет баланс отправителя
+        // ШАГ 5: юзер пополняет баланс отправителя
 
         CreateUserRequest user = AdminSteps.createUser();
         String userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(user.getUsername()).password(user.getPassword()).build()).extract().header("Authorization");
@@ -402,6 +398,4 @@ public class TransferMoneyTest {
         List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(user.getUsername(), user.getPassword(), senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain((double) transfer);
     }
-
-
 }
