@@ -1,16 +1,16 @@
 package iteration_2.api;
 
-import generators.RandomData;
+import api.generators.RandomData;
+import api.models.*;
 import iteration_1.api.BaseTest;
-import models.*;
-import models.comparison.ModelAssertions;
+import api.models.comparison.ModelAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import requests.steps.AdminSteps;
-import requests.steps.UserSteps;
-import specs.ResponseSpecs;
+import api.requests.steps.AdminSteps;
+import api.requests.steps.UserSteps;
+import api.specs.ResponseSpecs;
 
 import java.util.List;
 import java.util.stream.Stream;

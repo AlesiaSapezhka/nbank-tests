@@ -1,10 +1,10 @@
 package iteration_1.api;
 
-import models.CreateAccountResponse;
-import models.CreateUserRequest;
+import api.models.CreateAccountResponse;
+import api.models.CreateUserRequest;
 import org.junit.jupiter.api.Test;
-import requests.steps.AdminSteps;
-import requests.steps.UserSteps;
+import api.requests.steps.AdminSteps;
+import api.requests.steps.UserSteps;
 
 import java.util.List;
 

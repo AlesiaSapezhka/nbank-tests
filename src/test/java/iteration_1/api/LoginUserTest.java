@@ -1,8 +1,11 @@
 package iteration_1.api;
 
-import models.*;
+import api.models.CreateUserRequest;
+import api.models.LoginUserRequest;
+import api.models.LoginUserResponse;
+import api.models.UserRole;
 import org.junit.jupiter.api.Test;
-import requests.steps.AdminSteps;
+import api.requests.steps.AdminSteps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

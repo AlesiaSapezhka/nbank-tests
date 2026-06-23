@@ -1,17 +1,17 @@
 package iteration_2.api;
 
+import api.models.*;
 import iteration_1.api.BaseTest;
-import models.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import requests.steps.AdminSteps;
-import requests.steps.UserSteps;
+import api.requests.steps.AdminSteps;
+import api.requests.steps.UserSteps;
 
 import java.util.stream.Stream;
 
-import static specs.ResponseSpecs.PROFILE_UPDATED;
+import static api.specs.ResponseSpecs.PROFILE_UPDATED;
 
 
 public class ChangeNameTest extends BaseTest {
