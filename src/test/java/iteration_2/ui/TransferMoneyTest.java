@@ -4,7 +4,6 @@ import api.generators.RandomData;
 import api.models.*;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
-import com.codeborne.selenide.Selenide;
 import iteration_1.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 import ui.pages.BankAlerts;
@@ -37,16 +36,22 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 
         // ШАГ 7: проверка, что перевод осуществлен на UI
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + receiverAccountNumber + "!");
-
+        new UserDashboard().checkAlertMessageAndAccept(
+                String.format(
+                        "%s%s to account %s!",
+                        BankAlerts.TRANSFER_SUCCESSFUL.getMessage(),
+                        transfer,
+                        receiverAccountNumber
+                )
+        );
         // ШАГ 8: проверка, что перевод осуществлен на API
         List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(user.getUsername(), user.getPassword(), senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
@@ -71,16 +76,22 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(senderAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 
         // ШАГ 7: проверка, что перевод осуществлен на UI
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + senderAccountNumber + "!");
-
+        new UserDashboard().checkAlertMessageAndAccept(
+                String.format(
+                        "%s%s to account %s!",
+                        BankAlerts.TRANSFER_SUCCESSFUL.getMessage(),
+                        transfer,
+                        senderAccountNumber
+                )
+        );
         // ШАГ 8: проверка, что перевод осуществлен на API
         List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(user.getUsername(), user.getPassword(), senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
@@ -108,10 +119,10 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).sendTransfer();
 
@@ -141,10 +152,10 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterAmount(transfer).setCheckbox(true).sendTransfer();
 
@@ -178,10 +189,10 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 
@@ -214,10 +225,10 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 
@@ -250,10 +261,10 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(100, 500)).build();
         UserSteps.createDeposit(user.getUsername(), user.getPassword(), createDepositRequest);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 6: юзер переводит деньги
-        new UserDashboard().open().transferMoney().checkPageTitle("\uD83D\uDD04 Make a Transfer");
+        new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(4000, 5000);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 

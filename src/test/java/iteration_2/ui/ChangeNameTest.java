@@ -27,7 +27,7 @@ public class ChangeNameTest extends BaseUiTest {
 
         // ШАГИ ТЕСТА
         // ШАГ 4: юзер изменяет имя
-        new UserDashboard().open().moveToEditProfile().checkPageTitle("✏\uFE0F Edit Profile");
+        new UserDashboard().open().moveToEditProfile().checkPageTitle(UserDashboard.editProfileTitle);
         UpdateProfileRequest newName = UserSteps.generateValidName();
         new EditProfile().changeName(newName.getName());
 
@@ -55,7 +55,7 @@ public class ChangeNameTest extends BaseUiTest {
 
         // ШАГИ ТЕСТА
         // ШАГ 4: юзер изменяет имя
-        new UserDashboard().open().moveToEditProfile().checkPageTitle("✏\uFE0F Edit Profile");
+        new UserDashboard().open().moveToEditProfile().checkPageTitle(UserDashboard.editProfileTitle);
         UpdateProfileRequest newName = UserSteps.generateInvalidName(InvalidChangeNameCase.THREE_WORDS);
         new EditProfile().changeName(newName.getName());
 
@@ -65,7 +65,7 @@ public class ChangeNameTest extends BaseUiTest {
         new EditProfile().checkNameTextContains(newName.getName(), false).goToHomePage();
 
         // ШАГ 6: юзер переходит на главную страницу и проверяет велком сообщение со старым именем
-        new UserDashboard().checkWelcomeTextName("noname");
+        new UserDashboard().checkWelcomeTextName(UserDashboard.defaultUserName);
 
         // ШАГ 7: проверка, что имя НЕ сменено на API
         CreateUserResponse userProfile = UserSteps.getProfileInfo(user.getUsername(), user.getPassword());

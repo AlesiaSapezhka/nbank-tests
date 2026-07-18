@@ -4,7 +4,6 @@ import api.generators.RandomData;
 import api.models.*;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
-import com.codeborne.selenide.Selenide;
 import iteration_1.ui.BaseUiTest;
 import org.junit.jupiter.api.Test;
 import ui.pages.BankAlerts;
@@ -29,11 +28,11 @@ public class CreateDepositTest extends BaseUiTest {
         CreateAccountResponse accountData = UserSteps.createAccount(user.getUsername(), user.getPassword());
         String accountNumber = accountData.getAccountNumber();
         int accountId = accountData.getId();
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
 
         // ШАГИ ТЕСТА
         // ШАГ 5: юзер добавляет депозит
-        new UserDashboard().open().depositMoney().checkPageTitle("\uD83D\uDCB0 Deposit Money");
+        new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
         CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(1000, 5000)).build();
         new DepositMoney().selectAccount(accountNumber).enterAmount(deposit.getBalance()).clickDeposit();
 
@@ -59,10 +58,10 @@ public class CreateDepositTest extends BaseUiTest {
         CreateAccountResponse accountData = UserSteps.createAccount(user.getUsername(), user.getPassword());
         String accountNumber = accountData.getAccountNumber();
         int accountId = accountData.getId();
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 5: юзер добавляет депозит
-        new UserDashboard().open().depositMoney().checkPageTitle("\uD83D\uDCB0 Deposit Money");
+        new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
         CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(5001, 6000)).build();
         new DepositMoney().selectAccount(accountNumber).enterAmount(deposit.getBalance()).clickDeposit();
 
@@ -83,10 +82,10 @@ public class CreateDepositTest extends BaseUiTest {
         CreateUserRequest user = AdminSteps.createUser();
         authAsUser(user);
 
-        Selenide.open("/dashboard");
+        new UserDashboard().open();
         // ШАГИ ТЕСТА
         // ШАГ 5: юзер добавляет депозит
-        new UserDashboard().open().depositMoney().checkPageTitle("\uD83D\uDCB0 Deposit Money");
+        new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
         CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(10, 600)).build();
         new DepositMoney().enterAmount(deposit.getBalance()).clickDeposit();
 

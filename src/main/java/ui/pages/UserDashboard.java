@@ -14,6 +14,10 @@ public class UserDashboard extends BasePage <UserDashboard> {
     public SelenideElement depositMoney =$(Selectors.byText("\uD83D\uDCB0 Deposit Money"));
     public SelenideElement transferMoney =$(Selectors.byText("\uD83D\uDD04 Make a Transfer"));
     public SelenideElement editProfile = $(Selectors.byAttribute("class", "user-info"));
+    public static String defaultUserName = "noname";
+    public static String editProfileTitle = "✏\uFE0F Edit Profile";
+    public static String depositMoneyTitle = "\uD83D\uDCB0 Deposit Money";
+    public static String makeTransferTitle = "\uD83D\uDD04 Make a Transfer";
 
     @Override
     public String url() {
