@@ -15,9 +15,15 @@ import java.util.List;
 import static api.specs.ResponseSpecs.requestReturnsOK;
 
 public class UserSteps {
+    private String username;
+    private String password;
 
+    public UserSteps(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
-    public static CreateDepositResponse createDeposit(String username, String password, CreateDepositRequest createDepositRequest) {
+    public CreateDepositResponse createDeposit(CreateDepositRequest createDepositRequest) {
         return new ValidatedCrudRequester<CreateDepositResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.DEPOSIT, ResponseSpecs.requestReturnsOK()).post(createDepositRequest);
     }
 
@@ -38,7 +44,7 @@ public class UserSteps {
         new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSFER, ResponseSpecs.requestReturnsBadRequestWithoutKey(ResponseSpecs.TRANSFER_UNSUCCESSFUL)).post(createTransferRequest);
     }
 
-    public static CreateAccountResponse createAccount(String username, String password) {
+    public CreateAccountResponse createAccount() {
         return new ValidatedCrudRequester<CreateAccountResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.ACCOUNTS, ResponseSpecs.entityWasCreated()).post();
     }
 
@@ -60,15 +66,15 @@ public class UserSteps {
         new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.UPDATE_PROFILE, ResponseSpecs.requestReturnsBadRequestWithoutMessage()).update(newName);
     }
 
-    public static List<CreateAccountResponse> getAllAccountsList(String username, String password) {
+    public List<CreateAccountResponse> getAllAccountsList() {
         return new ValidatedCrudRequester<CreateAccountResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.CUSTOMER_ACCOUNTS, requestReturnsOK()).getList();
     }
 
-    public static List<GetTransactionsResponse> getAllTransactionsList(String username, String password, Integer accountId) {
+    public List<GetTransactionsResponse> getAllTransactionsList(Integer accountId) {
         return new ValidatedCrudRequester<GetTransactionsResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSACTIONS, ResponseSpecs.requestReturnsOK()).getList(accountId);
     }
 
-    public static CreateUserResponse getProfileInfo(String username, String password) {
+    public CreateUserResponse getProfileInfo() {
         return new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.CUSTOMER_PROFILE, ResponseSpecs.requestReturnsOK()).get();
     }
 }

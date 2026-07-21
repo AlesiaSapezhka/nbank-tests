@@ -8,13 +8,10 @@ import ui.pages.BasePage;
 
 public class AdminSessionExtension implements BeforeEachCallback {
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-    AdminSession adminSession = extensionContext.getRequiredTestMethod().getAnnotation(AdminSession.class);
-    if (adminSession == null) {
+    public void beforeEach(ExtensionContext extensionContext) throws Exception {
+    AdminSession annotation = extensionContext.getRequiredTestMethod().getAnnotation(AdminSession.class);
+    if (annotation != null) {
         BasePage.authAsUser(CreateUserRequest.getAdmin());
     }
-
     }
-
-
 }

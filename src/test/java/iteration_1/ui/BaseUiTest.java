@@ -1,11 +1,18 @@
 package iteration_1.ui;
 
 import com.codeborne.selenide.Configuration;
+import common.extensions.AdminSessionExtension;
+import common.extensions.BrowserMatchExtension;
+import common.extensions.UserSessionExtension;
 import iteration_1.api.BaseTest;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 
+@ExtendWith(AdminSessionExtension.class)
+@ExtendWith(UserSessionExtension.class)
+@ExtendWith(BrowserMatchExtension.class)
 public class BaseUiTest extends BaseTest {
     @BeforeAll
     public static void setupSelenoid() {

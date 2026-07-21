@@ -22,6 +22,10 @@ public class ChangeNameTest extends BaseTest {
     @Test
     public void userCanChangePersonalInfoWithValidDataTest() {
         CreateUserRequest user = AdminSteps.createUser();
+        UserSteps userSteps = new UserSteps(
+                user.getUsername(),
+                user.getPassword()
+        );
 
         UpdateProfileRequest newName = UserSteps.generateValidName();
         UpdateProfileResponse updateProfileResponse = UserSteps.changeNameValid(user.getUsername(), user.getPassword(), newName);
@@ -29,7 +33,7 @@ public class ChangeNameTest extends BaseTest {
         softly.assertThat(updateProfileResponse.getCustomer().getName()).isEqualTo(newName.getName());
         softly.assertThat(updateProfileResponse.getMessage()).isEqualTo(PROFILE_UPDATED);
 
-        CreateUserResponse userProfile = UserSteps.getProfileInfo(user.getUsername(), user.getPassword());
+        CreateUserResponse userProfile = userSteps.getProfileInfo();
         softly.assertThat(userProfile.getName()).isEqualTo(newName.getName());
     }
 
@@ -39,11 +43,15 @@ public class ChangeNameTest extends BaseTest {
     @ParameterizedTest
     public void userCanNotChangePersonalInfoWithInvalidDataTest(InvalidChangeNameCase invalidName) {
         CreateUserRequest user = AdminSteps.createUser();
+        UserSteps userSteps = new UserSteps(
+                user.getUsername(),
+                user.getPassword()
+        );
 
         UpdateProfileRequest newName = UserSteps.generateInvalidName(invalidName);
         UserSteps.changeNameInvalid(user.getUsername(), user.getPassword(), newName);
 
-        CreateUserResponse userProfile = UserSteps.getProfileInfo(user.getUsername(), user.getPassword());
+        CreateUserResponse userProfile = userSteps.getProfileInfo();
         softly.assertThat(userProfile.getName()).isEqualTo(null);
     }
 }

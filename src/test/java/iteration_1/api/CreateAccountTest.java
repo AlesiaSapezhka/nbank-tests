@@ -13,9 +13,13 @@ public class CreateAccountTest extends BaseTest {
     public void userCanCreateAccountTest() {
 
         CreateUserRequest userRequest = AdminSteps.createUser();
-        CreateAccountResponse createAccountResponse = UserSteps.createAccount(userRequest.getUsername(), userRequest.getPassword());
+        UserSteps userSteps = new UserSteps(
+                userRequest.getUsername(),
+                userRequest.getPassword()
+        );
+        CreateAccountResponse createAccountResponse = userSteps.createAccount();
 
-        List<CreateAccountResponse> accounts = UserSteps.getAllAccountsList(userRequest.getUsername(), userRequest.getPassword());
+        List<CreateAccountResponse> accounts = userSteps.getAllAccountsList();
 
         softly.assertThat(accounts).extracting(CreateAccountResponse::getId).contains(createAccountResponse.getId());
         softly.assertThat(accounts).extracting(CreateAccountResponse::getAccountNumber).contains(createAccountResponse.getAccountNumber());

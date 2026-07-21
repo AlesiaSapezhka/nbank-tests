@@ -29,17 +29,21 @@ public class CreateDepositTest extends BaseTest {
     @ParameterizedTest
     public void userCanCreateDepositWithValidDataTest(double deposit) {
         CreateUserRequest userRequest = AdminSteps.createUser();
+        UserSteps userSteps = new UserSteps(
+                userRequest.getUsername(),
+                userRequest.getPassword()
+        );
 
-        CreateAccountResponse accountData = UserSteps.createAccount(userRequest.getUsername(), userRequest.getPassword());
+        CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
-        CreateDepositResponse createDepositResponse = UserSteps.createDeposit(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
+        CreateDepositResponse createDepositResponse = userSteps.createDeposit(createDepositRequest);
 
         ModelAssertions.assertThatModels(createDepositRequest, createDepositResponse).match();
         softly.assertThat(createDepositResponse.getTransactions().getFirst().getType()).isEqualTo(TransactionsTypes.DEPOSIT);
 
-        List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(userRequest.getUsername(), userRequest.getPassword(), accountId);
+        List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.DEPOSIT);
     }
@@ -48,28 +52,36 @@ public class CreateDepositTest extends BaseTest {
     @ParameterizedTest
     public void userCanNotCreateDepositWithInvalidDataTest(double deposit) {
         CreateUserRequest userRequest = AdminSteps.createUser();
+        UserSteps userSteps = new UserSteps(
+                userRequest.getUsername(),
+                userRequest.getPassword()
+        );
 
-        CreateAccountResponse accountData = UserSteps.createAccount(userRequest.getUsername(), userRequest.getPassword());
+        CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(accountId).balance(deposit).build();
         UserSteps.createDepositInvalidData(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
 
-        List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(userRequest.getUsername(), userRequest.getPassword(), accountId);
+        List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(deposit);
     }
 
     @Test
     public void userCanNotCreateDepositForNotExistingAccountTest() {
         CreateUserRequest userRequest = AdminSteps.createUser();
+        UserSteps userSteps = new UserSteps(
+                userRequest.getUsername(),
+                userRequest.getPassword()
+        );
 
-        CreateAccountResponse accountData = UserSteps.createAccount(userRequest.getUsername(), userRequest.getPassword());
+        CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(RequestSpecs.INVALID_ACCOUNT_ID).balance(RandomData.getRandomAmount(1000, 5000)).build();
         UserSteps.createDepositInvalidAccount(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
 
-        List<GetTransactionsResponse> transactions = UserSteps.getAllTransactionsList(userRequest.getUsername(), userRequest.getPassword(), accountId);
+        List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createDepositRequest.getBalance());
     }
 }

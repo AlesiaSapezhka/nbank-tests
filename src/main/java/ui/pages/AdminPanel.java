@@ -4,6 +4,9 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import ui.element.UserBadge;
+
+import java.util.List;
 
 import static com.codeborne.selenide.Selenide.$;
 
@@ -25,8 +28,10 @@ public class AdminPanel extends BasePage<AdminPanel> {
         addUserButton.click();
         return this;
     }
-    public ElementsCollection getAllUsers() {
-        return $(Selectors.byText("All Users")).parent().findAll("li");
+
+    public List<UserBadge> getAllUsers() {
+        ElementsCollection elementsCollection =  $(Selectors.byText("All Users")).parent().findAll("li");
+        return generatePageElements(elementsCollection, UserBadge::new);
     }
 
 }
