@@ -132,7 +132,6 @@ public class TransferMoneyTest extends BaseUiTest {
     public void userCanNotTransferMoneyWithoutSelectingSenderAccountTest() {
         CreateAccountResponse accountData = SessionStorage.getSteps().createAccount();
         int senderAccountId = accountData.getId();
-        String senderAccountNumber = accountData.getAccountNumber();
 
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
