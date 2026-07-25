@@ -103,7 +103,6 @@ public class TransferMoneyTest extends BaseUiTest {
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(transfer);
     }
 
-    // Успешный кейс, возможно имя не обязательно для заполнения
     @Test
     @UserSession
     public void userCanNotTransferMoneyToMissedRecipientNameTest() {
@@ -121,10 +120,11 @@ public class TransferMoneyTest extends BaseUiTest {
         double transfer = RandomData.getRandomAmount(100, 500);
         new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
 
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_MISSED_FIELDS.getMessage());
+        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + receiverAccountNumber + "!");
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(senderAccountId);
-        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(transfer);
+        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
+        assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.TRANSFER_OUT);
     }
 
     @Test

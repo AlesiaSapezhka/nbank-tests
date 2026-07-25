@@ -1,6 +1,8 @@
 package ui.pages;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Condition.exactText;
@@ -18,8 +20,12 @@ public class EditProfile extends BasePage <EditProfile>  {
     }
 
     public void changeName(String newName) {
-        newNameField.sendKeys(newName);
-        saveChangesButton.click();
+        newNameField.shouldBe(Condition.visible);
+        Selenide.Wait().until(driver -> {
+            newNameField.setValue(newName);
+            return newNameField.is(Condition.value(newName));
+        });
+        saveChangesButton.shouldBe(Condition.enabled).click();
     }
 
     public EditProfile checkNameTextContains(String newName, boolean contains) {

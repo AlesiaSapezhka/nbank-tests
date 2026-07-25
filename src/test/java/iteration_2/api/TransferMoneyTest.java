@@ -2,7 +2,6 @@ package iteration_2.api;
 
 import api.generators.RandomData;
 import api.models.*;
-import common.storage.SessionStorage;
 import iteration_1.api.BaseTest;
 import api.models.comparison.ModelAssertions;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ public class TransferMoneyTest extends BaseTest {
     }
 
     @Test
-
     public void userCanTransferValidAmountOfMoneyToValidAccountTest() {
         CreateUserRequest userRequest = AdminSteps.createUser();
         UserSteps userSteps = new UserSteps(
@@ -37,7 +35,7 @@ public class TransferMoneyTest extends BaseTest {
         int receiverAccountId = receiverAccountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        userSteps.createDeposit(createDepositRequest);
 
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(RandomData.getRandomAmount(100, 500)).build();
         CreateTransferResponse transferResponse = UserSteps.createTransfer(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
@@ -62,7 +60,7 @@ public class TransferMoneyTest extends BaseTest {
         int senderAccountId = accountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        userSteps.createDeposit(createDepositRequest);
 
         int InvalidReceiverId = 987;
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(InvalidReceiverId).amount(RandomData.getRandomAmount(100, 500)).build();
@@ -89,7 +87,7 @@ public class TransferMoneyTest extends BaseTest {
         int receiverAccountId = receiverAccountData.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 2000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        userSteps.createDeposit(createDepositRequest);
 
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(transferAmount).build();
         UserSteps.createTransferWithInvalidCases(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
