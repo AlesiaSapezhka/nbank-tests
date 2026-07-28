@@ -3,8 +3,11 @@ package api.specs;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 
-import static org.hamcrest.Matchers.*;
+import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
 
 public class ResponseSpecs {
 
@@ -14,9 +17,6 @@ public class ResponseSpecs {
     public static final String PROFILE_UPDATED =
             "Profile updated successfully";
 
-    public static final String INVALID_ACCOUNT =
-            "Invalid account or amount";
-
     public static final String TRANSFER_SUCCESSFUL =
             "Transfer successful";
 
@@ -25,10 +25,6 @@ public class ResponseSpecs {
 
     public static final String UNAUTHORIZED_ACCESS =
             "Unauthorized access to account";
-
-    public static final String INVALID_TRANSFER =
-            "Invalid transfer: insufficient funds or invalid account";
-
 
     private static ResponseSpecBuilder defaultResponseBuilder() {
         return new ResponseSpecBuilder();
@@ -42,8 +38,11 @@ public class ResponseSpecs {
         return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_OK).build();
     }
 
-    public static ResponseSpecification requestReturnsBadRequest(String errorKey, String errorValue) {
-        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_BAD_REQUEST).expectBody(errorKey, equalTo(errorValue)).build();
+    public static ResponseSpecification requestReturnsBadRequest(String errorKey, List<String> errorValues) {
+        return defaultResponseBuilder()
+                .expectStatusCode(HttpStatus.SC_BAD_REQUEST)
+                .expectBody(errorKey, Matchers.containsInAnyOrder(errorValues.toArray(String[]::new)))
+                .build();
     }
 
     public static ResponseSpecification requestReturnsBadRequestWithoutKey(String errorMessage) {

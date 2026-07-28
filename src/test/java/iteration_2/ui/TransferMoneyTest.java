@@ -1,7 +1,10 @@
 package iteration_2.ui;
 
 import api.generators.RandomData;
-import api.models.*;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.GetTransactionsResponse;
+import api.models.TransactionsTypes;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import iteration_1.ui.BaseUiTest;
@@ -25,14 +28,19 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
-
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + receiverAccountNumber + "!");
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientName(RandomData.getUserName())
+                .enterRecipientAccount(receiverAccountNumber)
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer()
+                .shouldHaveDepositSuccessAlert(transfer, receiverAccountNumber);
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
@@ -46,14 +54,19 @@ public class TransferMoneyTest extends BaseUiTest {
         int senderAccountId = accountData.getId();
         String senderAccountNumber = accountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(senderAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
-
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + senderAccountNumber + "!");
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientName(RandomData.getUserName())
+                .enterRecipientAccount(senderAccountNumber)
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer()
+                .shouldHaveDepositSuccessAlert(transfer, senderAccountNumber);
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
@@ -70,12 +83,17 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).sendTransfer();
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientName(RandomData.getUserName())
+                .enterRecipientAccount(receiverAccountNumber)
+                .enterAmount(transfer)
+                .sendTransfer();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_MISSED_FIELDS.getMessage());
 
@@ -90,12 +108,17 @@ public class TransferMoneyTest extends BaseUiTest {
         int senderAccountId = accountData.getId();
         String senderAccountNumber = accountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterAmount(transfer).setCheckbox(true).sendTransfer();
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientName(RandomData.getUserName())
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_MISSED_FIELDS.getMessage());
 
@@ -113,14 +136,18 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
-
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_SUCCESSFUL.getMessage() + transfer + " to account " + receiverAccountNumber + "!");
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientAccount(receiverAccountNumber)
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer()
+                .shouldHaveDepositSuccessAlert(transfer, receiverAccountNumber);
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(senderAccountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
@@ -136,12 +163,17 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(100, 500);
-        new MakeTransfer().enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
+        new MakeTransfer()
+                .enterRecipientName(RandomData.getUserName())
+                .enterRecipientAccount(receiverAccountNumber)
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_MISSED_FIELDS.getMessage());
 
@@ -159,12 +191,18 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(100, 500)).build();
-        SessionStorage.getSteps().createDeposit(createDepositRequest);
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(100, 500)).build();
+        SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
         double transfer = RandomData.getRandomAmount(4000, 5000);
-        new MakeTransfer().selectAccount(senderAccountNumber).enterRecipientName("Ivan").enterRecipientAccount(receiverAccountNumber).enterAmount(transfer).setCheckbox(true).sendTransfer();
+        new MakeTransfer()
+                .selectAccount(senderAccountNumber)
+                .enterRecipientName(RandomData.getUserName())
+                .enterRecipientAccount(receiverAccountNumber)
+                .enterAmount(transfer)
+                .setCheckbox(true)
+                .sendTransfer();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_INCREASED_BALANCE.getMessage());
 

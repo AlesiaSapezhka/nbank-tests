@@ -12,11 +12,10 @@ import java.util.List;
 import static com.codeborne.selenide.Selenide.$;
 
 @Getter
-
 public class AdminPanel extends BasePage<AdminPanel> {
-    private final SelenideElement adminPanelText = $(Selectors.byText("Admin Panel"));
+    public static String invalidUserName = "al";
+    public static String adminPanelTitle = "Admin Panel";
     private final SelenideElement addUserButton = $(Selectors.byText("Add User"));
-
 
     @Override
     public String url() {

@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class TransferMoneyTest extends BaseTest {
     public static Stream<Arguments> transferInvalidData() {
-        return Stream.of(Arguments.of(-500), Arguments.of(10000.01), Arguments.of(2000));
+        return Stream.of(Arguments.of(InvalidTransferCase.NEGATIVE), Arguments.of(InvalidTransferCase.EXCEED_LIMIT), Arguments.of(InvalidTransferCase.MORE_THAN_BALANCE));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TransferMoneyTest extends BaseTest {
 
         int InvalidReceiverId = 987;
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(InvalidReceiverId).amount(RandomData.getRandomAmount(100, 500)).build();
-        UserSteps.createTransferWithInvalidCases(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
+        UserSteps. createTransferWithInvalidAccount(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createTransferRequest.getAmount());
@@ -73,7 +73,7 @@ public class TransferMoneyTest extends BaseTest {
 
     @MethodSource("transferInvalidData")
     @ParameterizedTest
-    public void userCanNotTransferInvalidAmountOfMoneyToValidAccountTest(double transferAmount) {
+    public void userCanNotTransferInvalidAmountOfMoneyToValidAccountTest(InvalidTransferCase invalidCase) {
         CreateUserRequest userRequest = AdminSteps.createUser();
         UserSteps userSteps = new UserSteps(
                 userRequest.getUsername(),
@@ -89,11 +89,11 @@ public class TransferMoneyTest extends BaseTest {
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 2000)).build();
         userSteps.createDeposit(createDepositRequest);
 
-        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(transferAmount).build();
-        UserSteps.createTransferWithInvalidCases(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
+        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(invalidCase.getTransferAmount()).build();
+        UserSteps.createTransferWithInvalidCases(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest,invalidCase);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(transferAmount);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(invalidCase.getTransferAmount());
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).doesNotContain(TransactionsTypes.TRANSFER_OUT);
     }
 }

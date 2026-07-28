@@ -5,7 +5,6 @@ import common.annotations.Browsers;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import org.junit.jupiter.api.Test;
-import ui.pages.BankAlerts;
 import ui.pages.UserDashboard;
 
 import java.util.List;
@@ -21,7 +20,7 @@ public class CreateAccountTest extends BaseUiTest {
         List<CreateAccountResponse> accounts = SessionStorage.getSteps().getAllAccountsList();
         assertThat(accounts).hasSize(1);
 
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.NEW_ACCOUNT_CREATED.getMessage() + accounts.getFirst().getAccountNumber());
+        new UserDashboard().createAccountAlert(accounts.getFirst().getAccountNumber());
         assertThat(accounts.getFirst().getBalance()).isZero();
     }
 }

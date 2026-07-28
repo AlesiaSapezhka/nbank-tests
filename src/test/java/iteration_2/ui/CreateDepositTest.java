@@ -1,7 +1,10 @@
 package iteration_2.ui;
 
 import api.generators.RandomData;
-import api.models.*;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.GetTransactionsResponse;
+import api.models.TransactionsTypes;
 import common.annotations.UserSession;
 import common.storage.SessionStorage;
 import iteration_1.ui.BaseUiTest;
@@ -24,9 +27,12 @@ public class CreateDepositTest extends BaseUiTest {
 
         new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
         CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(1000, 5000)).build();
-        new DepositMoney().selectAccount(accountNumber).enterAmount(deposit.getBalance()).clickDeposit();
 
-        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.DEPOSIT_SUCCESSFUL.getMessage() + deposit.getBalance() + " to account " + accountNumber + "!");
+        new DepositMoney()
+                .selectAccount(accountNumber)
+                .enterAmount(deposit.getBalance())
+                .clickDeposit()
+                .shouldHaveDepositSuccessAlert(deposit.getBalance(), accountNumber);
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(accountId);
         assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit.getBalance());

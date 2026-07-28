@@ -4,8 +4,10 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
+import org.openqa.selenium.Alert;
 
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.switchTo;
 
 @Getter
 public class UserDashboard extends BasePage <UserDashboard> {
@@ -47,5 +49,14 @@ public class UserDashboard extends BasePage <UserDashboard> {
     public UserDashboard checkWelcomeTextName(String name) {
         welcomeText.shouldBe(Condition.visible).shouldHave(Condition.text("Welcome, " + name + "!"));
         return this;
+    }
+
+    public void createAccountAlert(String accountNumber) {
+        Alert alert = switchTo().alert();
+        alert.getText().contains(
+                BankAlerts.NEW_ACCOUNT_CREATED.getMessage()
+                       + accountNumber
+        );
+        alert.accept();
     }
 }

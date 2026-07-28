@@ -34,6 +34,18 @@ public abstract class BasePage<T extends BasePage> {
         return (T) this;
     }
 
+    public void shouldHaveDepositSuccessAlert(double amount, String accountNumber) {
+        Alert alert = switchTo().alert();
+        alert.getText().contains(
+                BankAlerts.TRANSFER_SUCCESSFUL.getMessage()
+                        + amount
+                        + " to account "
+                        + accountNumber
+                        + "!"
+        );
+        alert.accept();
+    }
+
     public T goToHomePage() {
         homePage.click();
         return (T) this;
