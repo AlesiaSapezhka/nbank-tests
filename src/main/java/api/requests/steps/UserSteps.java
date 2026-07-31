@@ -3,7 +3,6 @@ package api.requests.steps;
 import api.models.*;
 import com.github.curiousoddman.rgxgen.RgxGen;
 import api.generators.RandomModelGenerator;
-import api.models.*;
 import api.requests.skelethon.Endpoint;
 import api.requests.skelethon.requesters.CrudRequester;
 import api.requests.skelethon.requesters.ValidatedCrudRequester;
@@ -27,8 +26,8 @@ public class UserSteps {
         return new ValidatedCrudRequester<CreateDepositResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.DEPOSIT, ResponseSpecs.requestReturnsOK()).post(createDepositRequest);
     }
 
-    public static void createDepositInvalidData(String username, String password, CreateDepositRequest createDepositRequest) {
-        new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.DEPOSIT, ResponseSpecs.requestReturnsBadRequestWithoutKey(ResponseSpecs.INVALID_ACCOUNT)).post(createDepositRequest);
+    public static void createDepositInvalidData(String username, String password, CreateDepositRequest createDepositRequest, InvalidDepositCase invalidDepositCase) {
+        new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.DEPOSIT, ResponseSpecs.requestReturnsBadRequestWithoutKey(invalidDepositCase.getErrorMessage())).post(createDepositRequest);
     }
 
     public static void createDepositInvalidAccount(String username, String password, CreateDepositRequest createDepositRequest) {
@@ -40,7 +39,11 @@ public class UserSteps {
 
     }
 
-    public static void createTransferWithInvalidCases(String username, String password, CreateTransferRequest createTransferRequest) {
+    public static void createTransferWithInvalidCases(String username, String password, CreateTransferRequest createTransferRequest, InvalidTransferCase invalidTransferCase) {
+        new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSFER, ResponseSpecs.requestReturnsBadRequestWithoutKey(invalidTransferCase.getErrorMessage())).post(createTransferRequest);
+    }
+
+    public static void createTransferWithInvalidAccount(String username, String password, CreateTransferRequest createTransferRequest) {
         new CrudRequester(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSFER, ResponseSpecs.requestReturnsBadRequestWithoutKey(ResponseSpecs.TRANSFER_UNSUCCESSFUL)).post(createTransferRequest);
     }
 

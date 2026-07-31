@@ -1,7 +1,10 @@
 package iteration_1.api;
 
+import api.dao.AccountDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.models.CreateAccountResponse;
 import api.models.CreateUserRequest;
+import api.requests.steps.DataBaseSteps;
 import org.junit.jupiter.api.Test;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
@@ -23,5 +26,8 @@ public class CreateAccountTest extends BaseTest {
 
         softly.assertThat(accounts).extracting(CreateAccountResponse::getId).contains(createAccountResponse.getId());
         softly.assertThat(accounts).extracting(CreateAccountResponse::getAccountNumber).contains(createAccountResponse.getAccountNumber());
+
+        AccountDao accountDao = DataBaseSteps.getAccountByAccountNumber(createAccountResponse.getAccountNumber());
+        DaoAndModelAssertions.assertThat(createAccountResponse, accountDao).match();
     }
 }

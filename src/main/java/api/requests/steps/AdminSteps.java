@@ -33,7 +33,11 @@ public class AdminSteps {
     }
     public static CreateUserRequest buildUserInvalidPassword(InvalidUserPasswordCase invalidCase) {
         CreateUserRequest request = RandomModelGenerator.generate(CreateUserRequest.class);
-        request.setPassword(new RgxGen(invalidCase.getRegex()).generate());
+        if (invalidCase == InvalidUserPasswordCase.BLANK) {
+            request.setPassword("");
+        } else {
+            request.setPassword(new RgxGen(invalidCase.getRegex()).generate());
+        }
         return request;
     }
 

@@ -1,6 +1,9 @@
 package iteration_2.api;
 
+import api.dao.UserDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.models.*;
+import api.requests.steps.DataBaseSteps;
 import iteration_1.api.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +15,7 @@ import api.requests.steps.UserSteps;
 import java.util.stream.Stream;
 
 import static api.specs.ResponseSpecs.PROFILE_UPDATED;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class ChangeNameTest extends BaseTest {
@@ -22,10 +26,7 @@ public class ChangeNameTest extends BaseTest {
     @Test
     public void userCanChangePersonalInfoWithValidDataTest() {
         CreateUserRequest user = AdminSteps.createUser();
-        UserSteps userSteps = new UserSteps(
-                user.getUsername(),
-                user.getPassword()
-        );
+        UserSteps userSteps = new UserSteps(user.getUsername(),user.getPassword());
 
         UpdateProfileRequest newName = UserSteps.generateValidName();
         UpdateProfileResponse updateProfileResponse = UserSteps.changeNameValid(user.getUsername(), user.getPassword(), newName);
@@ -35,10 +36,11 @@ public class ChangeNameTest extends BaseTest {
 
         CreateUserResponse userProfile = userSteps.getProfileInfo();
         softly.assertThat(userProfile.getName()).isEqualTo(newName.getName());
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(user.getUsername());
+        DaoAndModelAssertions.assertThat(userProfile, userDao).match();
     }
 
-
-    // Получилось поменять имя на невалидные кейсы
     @MethodSource("invalidNames")
     @ParameterizedTest
     public void userCanNotChangePersonalInfoWithInvalidDataTest(InvalidChangeNameCase invalidName) {
@@ -53,5 +55,7 @@ public class ChangeNameTest extends BaseTest {
 
         CreateUserResponse userProfile = userSteps.getProfileInfo();
         softly.assertThat(userProfile.getName()).isEqualTo(null);
+
+        assertNull(DataBaseSteps.getUserByUsername(userProfile.getName()));
     }
 }

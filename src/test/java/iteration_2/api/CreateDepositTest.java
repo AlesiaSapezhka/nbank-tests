@@ -1,9 +1,12 @@
 package iteration_2.api;
 
+import api.dao.TransactionsDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.generators.RandomData;
 import api.models.*;
 import api.models.comparison.ModelAssertions;
 import api.requests.steps.AdminSteps;
+import api.requests.steps.DataBaseSteps;
 import api.requests.steps.UserSteps;
 import api.specs.RequestSpecs;
 import iteration_1.api.BaseTest;
@@ -14,6 +17,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateDepositTest extends BaseTest {
 
@@ -43,6 +48,19 @@ public class CreateDepositTest extends BaseTest {
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.DEPOSIT);
+
+        GetTransactionsResponse transferIn = transactions.stream()
+                .filter(t -> t.getType() == TransactionsTypes.DEPOSIT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("DEPOSIT transaction not found in API response"));
+
+        List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(accountId);
+        TransactionsDao transferInDao = transactionsDao.stream()
+                .filter(t -> t.getType() == TransactionsTypes.DEPOSIT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("DEPOSIT transaction not found in DB"));
+
+        DaoAndModelAssertions.assertThat(transferIn, transferInDao).match();
     }
 
     @MethodSource("depositInvalidData")
@@ -59,6 +77,11 @@ public class CreateDepositTest extends BaseTest {
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(invalidCase.getDepositAmount());
+
+        List<TransactionsDao> depositDao = DataBaseSteps.getTransactionsByAccountId(accountId);
+        assertThat(depositDao)
+                .extracting(TransactionsDao::getType)
+                .doesNotContain(TransactionsTypes.DEPOSIT);
     }
 
     @Test
@@ -74,5 +97,10 @@ public class CreateDepositTest extends BaseTest {
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createDepositRequest.getBalance());
+
+        List<TransactionsDao> depositDao = DataBaseSteps.getTransactionsByAccountId(accountId);
+        assertThat(depositDao)
+                .extracting(TransactionsDao::getType)
+                .doesNotContain(TransactionsTypes.DEPOSIT);
     }
 }

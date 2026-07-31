@@ -1,22 +1,23 @@
 package iteration_1.api;
 
+import api.dao.UserDao;
+import api.dao.comparison.DaoAndModelAssertions;
 import api.models.CreateUserRequest;
 import api.models.CreateUserResponse;
 import api.models.InvalidUserPasswordCase;
 import api.models.InvalidUsernameCase;
 import api.models.comparison.ModelAssertions;
+import api.requests.steps.DataBaseSteps;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import api.requests.skelethon.Endpoint;
-import api.requests.skelethon.requesters.ValidatedCrudRequester;
 import api.requests.steps.AdminSteps;
-import api.specs.RequestSpecs;
-import api.specs.ResponseSpecs;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CreateUserTest extends BaseTest {
 
@@ -30,15 +31,16 @@ public class CreateUserTest extends BaseTest {
     @Test
     public void adminCanCreateUserWithValidDataTest() {
         CreateUserRequest userRequest = AdminSteps.buildUserValid();
-        CreateUserResponse userResponse = AdminSteps.createUserValid(userRequest);
+        CreateUserResponse createUserResponse = AdminSteps.createUserValid(userRequest);
 
-        softly.assertThat(userResponse.getUsername()).isEqualTo(userRequest.getUsername());
-
-        CreateUserResponse createUserResponse = new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
+        softly.assertThat(createUserResponse.getUsername()).isEqualTo(userRequest.getUsername());
         ModelAssertions.assertThatModels(userRequest, createUserResponse).match();
 
         List<CreateUserResponse> users = AdminSteps.getAllUsers();
         softly.assertThat(users).anySatisfy(user -> ModelAssertions.assertThatModels(userRequest, user).match());
+
+        UserDao userDao = DataBaseSteps.getUserByUsername(userRequest.getUsername());
+        DaoAndModelAssertions.assertThat(createUserResponse, userDao).match();
     }
 
     @MethodSource("invalidUserNames")
@@ -49,6 +51,8 @@ public class CreateUserTest extends BaseTest {
 
         List<CreateUserResponse> users = AdminSteps.getAllUsers();
         softly.assertThat(users).noneSatisfy(user -> ModelAssertions.assertThatModels(createUserRequest, user).match());
+
+        assertNull(DataBaseSteps.getUserByUsername(createUserRequest.getUsername()));
     }
 
     @MethodSource("invalidUserPasswords")
@@ -59,5 +63,7 @@ public class CreateUserTest extends BaseTest {
 
         List<CreateUserResponse> users = AdminSteps.getAllUsers();
         softly.assertThat(users).noneSatisfy(user -> ModelAssertions.assertThatModels(createUserRequest, user).match());
+
+        assertNull(DataBaseSteps.getUserByUsername(createUserRequest.getUsername()));
     }
 }

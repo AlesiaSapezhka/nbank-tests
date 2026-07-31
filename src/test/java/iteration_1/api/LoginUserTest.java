@@ -28,6 +28,5 @@ public class LoginUserTest {
 
         assertThat(userResponse.getRole()).isEqualTo(UserRole.USER.toString());
         assertThat(userResponse.getUsername()).isEqualTo(user.getUsername());
-
     }
 }

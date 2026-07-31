@@ -1,7 +1,10 @@
 package iteration_2.api;
 
+import api.dao.comparison.DaoAndModelAssertions;
+import api.dao.TransactionsDao;
 import api.generators.RandomData;
 import api.models.*;
+import api.requests.steps.DataBaseSteps;
 import iteration_1.api.BaseTest;
 import api.models.comparison.ModelAssertions;
 import org.junit.jupiter.api.Test;
@@ -14,6 +17,8 @@ import api.specs.ResponseSpecs;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransferMoneyTest extends BaseTest {
     public static Stream<Arguments> transferInvalidData() {
@@ -46,6 +51,19 @@ public class TransferMoneyTest extends BaseTest {
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(createTransferRequest.getAmount());
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.TRANSFER_OUT);
+
+        GetTransactionsResponse transferOut = transactions.stream()
+                .filter(t -> t.getType() == TransactionsTypes.TRANSFER_OUT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("TRANSFER_OUT transaction not found in API response"));
+
+        List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(senderAccountId);
+        TransactionsDao transferOutDao = transactionsDao.stream()
+                .filter(t -> t.getType() == TransactionsTypes.TRANSFER_OUT)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("TRANSFER_OUT transaction not found in DB"));
+
+        DaoAndModelAssertions.assertThat(transferOut, transferOutDao).match();
     }
 
     @Test
@@ -68,6 +86,11 @@ public class TransferMoneyTest extends BaseTest {
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createTransferRequest.getAmount());
+
+        List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(senderAccountId);
+        assertThat(transactionsDao)
+                .extracting(TransactionsDao::getType)
+                .doesNotContain(TransactionsTypes.TRANSFER_OUT);
 
     }
 
@@ -95,5 +118,10 @@ public class TransferMoneyTest extends BaseTest {
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(invalidCase.getTransferAmount());
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).doesNotContain(TransactionsTypes.TRANSFER_OUT);
+
+        List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(senderAccountId);
+        assertThat(transactionsDao)
+                .extracting(TransactionsDao::getType)
+                .doesNotContain(TransactionsTypes.TRANSFER_OUT);
     }
 }
