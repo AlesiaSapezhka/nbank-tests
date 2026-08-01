@@ -70,6 +70,8 @@ public class RandomModelGenerator {
             return Integer.parseInt(result);
         } else if (type.equals(Long.class) || type.equals(long.class)) {
             return Long.parseLong(result);
+        } else if (type.equals(Double.class) || type.equals(double.class)) {
+            return Double.parseDouble(result);
         } else {
             return result;
         }
@@ -78,12 +80,10 @@ public class RandomModelGenerator {
     private static List<String> generateRandomList(Field field) {
         // Пытаемся определить generic-параметр списка
         Type genericType = field.getGenericType();
-        if (genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) genericType;
+        if (genericType instanceof ParameterizedType pt) {
             Type actualType = pt.getActualTypeArguments()[0];
             if (actualType == String.class) {
-                return List.of(UUID.randomUUID().toString().substring(0, 5),
-                        UUID.randomUUID().toString().substring(0, 5));
+                return List.of(UUID.randomUUID().toString().substring(0, 5), UUID.randomUUID().toString().substring(0, 5));
             }
         }
         return Collections.emptyList();

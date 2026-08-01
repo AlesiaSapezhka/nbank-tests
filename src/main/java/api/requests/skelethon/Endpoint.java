@@ -33,6 +33,14 @@ public enum Endpoint {
     ),
     UPDATE_PROFILE(
             "/customer/profile", UpdateProfileRequest.class, UpdateProfileResponse.class
+    ),
+
+    TRANSFER_WITH_FRAUD_CHECK(
+            "/accounts/transfer-with-fraud-check", CreateTransferRequest.class, CreateTransferResponse.class
+    ),
+
+    FRAUD_CHECK_STATUS(
+            "/api/v1/accounts/fraud-check/{transactionId}", BaseModel.class, FraudCheckResponse.class
     );
 
 
