@@ -39,6 +39,10 @@ public enum Endpoint {
             "/accounts/transfer-with-fraud-check", CreateTransferRequest.class, CreateTransferResponse.class
     ),
 
+    DELETE(
+            "/admin/users/{id}", CreateUserRequest.class, CreateUserResponse.class
+    ),
+
     FRAUD_CHECK_STATUS(
             "/api/v1/accounts/fraud-check/{transactionId}", BaseModel.class, FraudCheckResponse.class
     );

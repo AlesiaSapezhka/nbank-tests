@@ -36,7 +36,10 @@ public class UserSteps {
 
     public static CreateTransferResponse createTransfer(String username, String password, CreateTransferRequest createTransferRequest) {
         return new ValidatedCrudRequester<CreateTransferResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSFER, ResponseSpecs.requestReturnsOK()).post(createTransferRequest);
+    }
 
+    public static CreateTransferResponse createTransferWithFraudCheck(String username, String password, CreateTransferRequest createTransferRequest) {
+        return new ValidatedCrudRequester<CreateTransferResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.TRANSFER_WITH_FRAUD_CHECK, ResponseSpecs.requestReturnsOK()).post(createTransferRequest);
     }
 
     public static void createTransferWithInvalidCases(String username, String password, CreateTransferRequest createTransferRequest, InvalidTransferCase invalidTransferCase) {

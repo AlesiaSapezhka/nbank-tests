@@ -26,6 +26,17 @@ public class ResponseSpecs {
     public static final String UNAUTHORIZED_ACCESS =
             "Unauthorized access to account";
 
+    public static final String FRAUD_APPROVED_STATUS =
+            "APPROVED";
+
+    public static final String FRAUD_APPROVED_MESSAGE =
+            "Transfer approved and processed immediately";
+
+    public static final String  FRAUD_APPROVED_REASON =
+            "Low risk transaction";
+
+
+
     private static ResponseSpecBuilder defaultResponseBuilder() {
         return new ResponseSpecBuilder();
     }
@@ -46,7 +57,7 @@ public class ResponseSpecs {
     }
 
     public static ResponseSpecification requestReturnsBadRequestWithoutKey(String errorMessage) {
-        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_BAD_REQUEST).expectBody(equalTo(errorMessage)).build();
+        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_BAD_REQUEST).expectBody("message", equalTo(errorMessage)).build();
     }
 
     public static ResponseSpecification requestReturnsBadRequestWithoutMessage() {

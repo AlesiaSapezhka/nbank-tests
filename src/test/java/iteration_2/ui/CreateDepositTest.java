@@ -26,16 +26,16 @@ public class CreateDepositTest extends BaseUiTest {
         int accountId = accountData.getId();
 
         new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
-        CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest deposit = CreateDepositRequest.builder().amount(RandomData.getRandomAmount(1000, 5000)).build();
 
         new DepositMoney()
                 .selectAccount(accountNumber)
-                .enterAmount(deposit.getBalance())
+                .enterAmount(deposit.getAmount())
                 .clickDeposit()
-                .shouldHaveDepositSuccessAlert(deposit.getBalance(), accountNumber);
+                .shouldHaveDepositSuccessAlert(deposit.getAmount(), accountNumber);
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(accountId);
-        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit.getBalance());
+        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit.getAmount());
         assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.DEPOSIT);
     }
 
@@ -47,21 +47,21 @@ public class CreateDepositTest extends BaseUiTest {
         int accountId = accountData.getId();
 
         new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
-        CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(5001, 6000)).build();
-        new DepositMoney().selectAccount(accountNumber).enterAmount(deposit.getBalance()).clickDeposit();
+        CreateDepositRequest deposit = CreateDepositRequest.builder().amount(RandomData.getRandomAmount(5001, 6000)).build();
+        new DepositMoney().selectAccount(accountNumber).enterAmount(deposit.getAmount()).clickDeposit();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.DEPOSIT_UNSUCCESSFUL.getMessage());
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(accountId);
-        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(deposit.getBalance());
+        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(deposit.getAmount());
     }
 
     @Test
     @UserSession
     public void userCanNotCreateDepositWithoutSelectingAccountTest() {
         new UserDashboard().open().depositMoney().checkPageTitle(UserDashboard.depositMoneyTitle);
-        CreateDepositRequest deposit = CreateDepositRequest.builder().balance(RandomData.getRandomAmount(10, 600)).build();
-        new DepositMoney().enterAmount(deposit.getBalance()).clickDeposit();
+        CreateDepositRequest deposit = CreateDepositRequest.builder().amount(RandomData.getRandomAmount(10, 600)).build();
+        new DepositMoney().enterAmount(deposit.getAmount()).clickDeposit();
 
         new UserDashboard().checkAlertMessageAndAccept(BankAlerts.DEPOSIT_WITHOUT_SELECTING_ACCOUNT.getMessage());
     }

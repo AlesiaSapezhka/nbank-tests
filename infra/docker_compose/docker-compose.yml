@@ -17,7 +17,7 @@ services:
       retries: 5
 
   nbank:
-    image: nobugsme/nbank:with_fraud_check
+    image: nobugsme/nbank:with_fraud_check_with_transfer_fix
     container_name: nbank-app
     ports:
       - "4111:4111"

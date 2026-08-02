@@ -1,7 +1,6 @@
-package iteration1.api;
+package common.extensions;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import common.annotations.FraudCheckMock;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -31,7 +30,7 @@ public class FraudCheckWireMockExtension implements BeforeEachCallback, AfterEac
     private void setupWireMock(FraudCheckMock config) {
         wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(config.port()));
         wireMockServer.start();
-        WireMock.configureFor("localhost", config.port());
+        configureFor("localhost", config.port());
 
         // Create the response body based on annotation parameters
         String responseBody = String.format("{\n" +

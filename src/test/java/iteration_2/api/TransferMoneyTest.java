@@ -39,7 +39,7 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse receiverAccountData = userSteps.createAccount();
         int receiverAccountId = receiverAccountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         userSteps.createDeposit(createDepositRequest);
 
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(RandomData.getRandomAmount(100, 500)).build();
@@ -77,7 +77,7 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse accountData = userSteps.createAccount();
         int senderAccountId = accountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         userSteps.createDeposit(createDepositRequest);
 
         int InvalidReceiverId = 987;
@@ -109,7 +109,7 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse receiverAccountData = userSteps.createAccount();
         int receiverAccountId = receiverAccountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().id(senderAccountId).balance(RandomData.getRandomAmount(1000, 2000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 2000)).build();
         userSteps.createDeposit(createDepositRequest);
 
         CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(invalidCase.getTransferAmount()).build();

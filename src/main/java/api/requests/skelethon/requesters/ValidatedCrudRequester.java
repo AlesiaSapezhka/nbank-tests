@@ -52,6 +52,6 @@ public class ValidatedCrudRequester<T extends BaseModel> extends HttpRequests im
 
     @Override
     public Object delete(int id) {
-        return null;
+        return crudRequester.delete(id);
     }
 }

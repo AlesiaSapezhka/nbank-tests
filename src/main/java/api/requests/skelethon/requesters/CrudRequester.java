@@ -70,8 +70,14 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
     }
 
     @Override
-    public Object delete(int id) {
-        return null;
+    public ValidatableResponse delete(int id) {
+        return given()
+                .spec(requestSpecification)
+                .pathParam("id", id)
+                .when()
+                .delete(endpoint.getUrl())
+                .then()
+                .spec(responseSpecification);
     }
 }
 

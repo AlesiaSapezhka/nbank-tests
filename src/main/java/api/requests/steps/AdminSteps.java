@@ -1,15 +1,15 @@
 package api.requests.steps;
 
 import api.models.*;
-import com.github.curiousoddman.rgxgen.RgxGen;
 import api.generators.RandomModelGenerator;
-import io.restassured.response.ValidatableResponse;
-import api.models.*;
 import api.requests.skelethon.Endpoint;
 import api.requests.skelethon.requesters.CrudRequester;
 import api.requests.skelethon.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import com.github.curiousoddman.rgxgen.RgxGen;
+import common.storage.CreatedUsersStorage;
+import io.restassured.response.ValidatableResponse;
 
 import java.util.List;
 
@@ -42,7 +42,10 @@ public class AdminSteps {
     }
 
     public static CreateUserResponse createUserValid(CreateUserRequest request) {
-        return new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(request);
+        CreateUserResponse response = new ValidatedCrudRequester<CreateUserResponse>(
+                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(request);
+        CreatedUsersStorage.add((int) response.getId());
+        return response;
     }
 
     public static ValidatableResponse createUserInvalidName(CreateUserRequest request, InvalidUsernameCase invalidCase) {
@@ -56,11 +59,17 @@ public class AdminSteps {
 
     public static CreateUserRequest createUser() {
         CreateUserRequest userRequest = RandomModelGenerator.generate(CreateUserRequest.class);
-        new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
+        CreateUserResponse response = new ValidatedCrudRequester<CreateUserResponse>(
+                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
+        CreatedUsersStorage.add((int) response.getId());
         return userRequest;
     }
 
     public static List<CreateUserResponse> getAllUsers() {
         return new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList();
+    }
+
+    public static ValidatableResponse deleteUser(int userId) {
+        return new CrudRequester(RequestSpecs.adminSpec(), Endpoint.DELETE, ResponseSpecs.requestReturnsOK()).delete(userId);
     }
 }

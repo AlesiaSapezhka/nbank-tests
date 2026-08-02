@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateDepositRequest extends BaseModel{
     @GeneratingRule(regex = "^[A-Za-z0-9]{3,15}$")
-    private int id;
+    private int accountId;
     @GeneratingRule(regex = "^[A-Za-z0-9]{3,15}$")
-    private double balance;
+    private double amount;
 }
