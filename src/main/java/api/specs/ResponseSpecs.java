@@ -35,6 +35,34 @@ public class ResponseSpecs {
     public static final String  FRAUD_APPROVED_REASON =
             "Low risk transaction";
 
+    public static final String FRAUD_BLOCKED_STATUS =
+            "BLOCKED";
+
+    public static final String FRAUD_BLOCKED_MESSAGE =
+            "Transfer blocked due to fraud detection";
+
+    public static final String FRAUD_REVIEW_REQUIRED_STATUS =
+            "MANUAL_REVIEW_REQUIRED";
+
+    public static final String FRAUD_REVIEW_REQUIRED_MESSAGE =
+            "Transfer requires manual review";
+
+    public static final String FRAUD_VERIFICATION_REQUIRED_STATUS =
+            "VERIFICATION_REQUIRED";
+
+    public static final String FRAUD_VERIFICATION_REQUIRED_MESSAGE =
+            "Additional verification required";
+
+    public static final String FRAUD_SERVICE_UNAVAILABLE_REASON =
+            "Fraud detection service is currently unavailable";
+
+    public static final String FRAUD_SERVICE_HTTP_ERROR_REASON =
+            "Unexpected error during fraud check: 500 Server Error: \"{\"error\":\"fraud service error\"}\"";
+
+    public static final String FRAUD_SERVICE_TIMEOUT_REASON =
+            "Unexpected error during fraud check: Cannot invoke \"java.lang.Boolean.booleanValue()\" because the return value of \"me.nobugs.bank.services.FraudDetectionClientService$FraudCheckResponse.getRequiresManualReview()\" is null";
+
+
 
 
     private static ResponseSpecBuilder defaultResponseBuilder() {
