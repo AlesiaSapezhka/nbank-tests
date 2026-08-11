@@ -93,6 +93,6 @@ public class ResponseSpecs {
     }
 
     public static ResponseSpecification requestReturnsForbiddenRequestWithoutKey(String errorMessage) {
-        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).expectBody(equalTo(errorMessage)).build();
+        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).expectBody("message",equalTo(errorMessage)).build();
     }
 }

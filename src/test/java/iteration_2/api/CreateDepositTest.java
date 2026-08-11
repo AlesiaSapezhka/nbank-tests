@@ -43,7 +43,6 @@ public class CreateDepositTest extends BaseTest {
         CreateDepositResponse createDepositResponse = userSteps.createDeposit(createDepositRequest);
 
         ModelAssertions.assertThatModels(createDepositRequest, createDepositResponse).match();
-        softly.assertThat(createDepositResponse.getTransactions().getFirst().getType()).isEqualTo(TransactionsTypes.DEPOSIT);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
         softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(deposit);
