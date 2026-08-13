@@ -36,3 +36,10 @@ jobs: # аналог этапов
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+         name: surefire-reports
+         path: target/surefire-reports/
