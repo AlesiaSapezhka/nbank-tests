@@ -1,14 +1,17 @@
 name: Run tests
 
-# триггер
-on: [ push, workflow_dispatch ]
+on:
+  push:
+    paths:
+      - 'src/**'
+  workflow_dispatch:
 
-jobs: # аналог этапов
+jobs:
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
-    steps: # шаги конкретной job
-      - name: Checkout repository # копируем файлы репозитория внутрь CI агента
+    steps:
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK

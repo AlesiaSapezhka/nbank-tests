@@ -22,10 +22,21 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class CreateUserTest extends BaseTest {
 
     static Stream<Arguments> invalidUserNames() {
-        return Stream.of(Arguments.of(InvalidUsernameCase.BLANK), Arguments.of(InvalidUsernameCase.TOO_SHORT), Arguments.of(InvalidUsernameCase.TOO_LONG), Arguments.of(InvalidUsernameCase.INVALID_CHAR));
+        return Stream.of(
+                Arguments.of(InvalidUsernameCase.BLANK),
+                Arguments.of(InvalidUsernameCase.TOO_SHORT),
+                Arguments.of(InvalidUsernameCase.TOO_LONG),
+                Arguments.of(InvalidUsernameCase.INVALID_CHAR));
     }
+
     static Stream<Arguments> invalidUserPasswords() {
-        return Stream.of(Arguments.of(InvalidUserPasswordCase.BLANK), Arguments.of(InvalidUserPasswordCase.TOO_SHORT), Arguments.of(InvalidUserPasswordCase.NO_DIGIT), Arguments.of(InvalidUserPasswordCase.NO_SPECIAL_CHAR), Arguments.of(InvalidUserPasswordCase.NO_UPPERCASE), Arguments.of(InvalidUserPasswordCase.NO_LOWERCASE));
+        return Stream.of(
+                Arguments.of(InvalidUserPasswordCase.BLANK),
+                Arguments.of(InvalidUserPasswordCase.TOO_SHORT),
+                Arguments.of(InvalidUserPasswordCase.NO_DIGIT),
+                Arguments.of(InvalidUserPasswordCase.NO_SPECIAL_CHAR),
+                Arguments.of(InvalidUserPasswordCase.NO_UPPERCASE),
+                Arguments.of(InvalidUserPasswordCase.NO_LOWERCASE));
     }
 
     @Test

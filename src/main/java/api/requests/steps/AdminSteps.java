@@ -1,7 +1,12 @@
 package api.requests.steps;
 
-import api.models.*;
 import api.generators.RandomModelGenerator;
+import api.models.CreateUserRequest;
+import api.models.CreateUserResponse;
+import api.models.InvalidUserPasswordCase;
+import api.models.InvalidUsernameCase;
+import api.models.LoginUserRequest;
+import api.models.LoginUserResponse;
 import api.requests.skelethon.Endpoint;
 import api.requests.skelethon.requesters.CrudRequester;
 import api.requests.skelethon.requesters.ValidatedCrudRequester;
@@ -13,13 +18,18 @@ import io.restassured.response.ValidatableResponse;
 
 import java.util.List;
 
-public class AdminSteps {
+public final class AdminSteps {
+
+    private AdminSteps() { }
+
     public static LoginUserRequest createAdmin() {
         return LoginUserRequest.builder().username("admin").password("admin").build();
     }
 
     public static LoginUserResponse login(String username, String password) {
-        return new ValidatedCrudRequester<LoginUserResponse>(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(username).password(password).build());
+        return new ValidatedCrudRequester<LoginUserResponse>(
+                RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK())
+                .post(LoginUserRequest.builder().username(username).password(password).build());
     }
 
     public static CreateUserRequest buildUserValid() {
@@ -31,6 +41,7 @@ public class AdminSteps {
         request.setUsername(new RgxGen(invalidCase.getRegex()).generate());
         return request;
     }
+
     public static CreateUserRequest buildUserInvalidPassword(InvalidUserPasswordCase invalidCase) {
         CreateUserRequest request = RandomModelGenerator.generate(CreateUserRequest.class);
         if (invalidCase == InvalidUserPasswordCase.BLANK) {
@@ -48,14 +59,21 @@ public class AdminSteps {
         return response;
     }
 
-    public static ValidatableResponse createUserInvalidName(CreateUserRequest request, InvalidUsernameCase invalidCase) {
-        return new CrudRequester(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsBadRequest(invalidCase.getField(), invalidCase.getErrorMessage())).post(request);
+    public static ValidatableResponse createUserInvalidName(
+            CreateUserRequest request, InvalidUsernameCase invalidCase) {
+        return new CrudRequester(
+                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER,
+                ResponseSpecs.requestReturnsBadRequest(invalidCase.getField(), invalidCase.getErrorMessage()))
+                .post(request);
     }
 
-    public static ValidatableResponse createUserInvalidPassword(CreateUserRequest request, InvalidUserPasswordCase invalidCase) {
-        return new CrudRequester(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsBadRequest(invalidCase.getField(), invalidCase.getErrorMessage())).post(request);
+    public static ValidatableResponse createUserInvalidPassword(
+            CreateUserRequest request, InvalidUserPasswordCase invalidCase) {
+        return new CrudRequester(
+                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER,
+                ResponseSpecs.requestReturnsBadRequest(invalidCase.getField(), invalidCase.getErrorMessage()))
+                .post(request);
     }
-
 
     public static CreateUserRequest createUser() {
         CreateUserRequest userRequest = RandomModelGenerator.generate(CreateUserRequest.class);
@@ -66,10 +84,12 @@ public class AdminSteps {
     }
 
     public static List<CreateUserResponse> getAllUsers() {
-        return new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList();
+        return new ValidatedCrudRequester<CreateUserResponse>(
+                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList();
     }
 
     public static ValidatableResponse deleteUser(int userId) {
-        return new CrudRequester(RequestSpecs.adminSpec(), Endpoint.DELETE, ResponseSpecs.requestReturnsOK()).delete(userId);
+        return new CrudRequester(RequestSpecs.adminSpec(), Endpoint.DELETE, ResponseSpecs.requestReturnsOK())
+                .delete(userId);
     }
 }

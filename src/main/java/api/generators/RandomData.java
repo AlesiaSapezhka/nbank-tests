@@ -1,18 +1,17 @@
 package api.generators;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.Random;
 
-
-public class RandomData {
-    private RandomData(){};
+public final class RandomData {
+    private RandomData() { }
 
     public static long getRandomAmount(long min, long max) {
         return min + new Random().nextLong(max - min + 1);
     }
 
-    public static String getUserName(){
+    public static String getUserName() {
         return RandomStringUtils.randomAlphabetic(10).toLowerCase();
     }
-
 }

@@ -28,7 +28,8 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -54,7 +55,8 @@ public class TransferMoneyTest extends BaseUiTest {
         int senderAccountId = accountData.getId();
         String senderAccountNumber = accountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -83,7 +85,8 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -108,7 +111,8 @@ public class TransferMoneyTest extends BaseUiTest {
         int senderAccountId = accountData.getId();
         String senderAccountNumber = accountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -136,7 +140,8 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -163,7 +168,8 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
@@ -191,7 +197,8 @@ public class TransferMoneyTest extends BaseUiTest {
         CreateAccountResponse receiverAccountData = SessionStorage.getSteps().createAccount();
         String receiverAccountNumber = receiverAccountData.getAccountNumber();
 
-        CreateDepositRequest depositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(100, 500)).build();
+        CreateDepositRequest depositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(100, 500)).build();
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);

@@ -4,7 +4,7 @@ import com.codeborne.selenide.SelenideElement;
 import lombok.Getter;
 
 @Getter
-public class UserBadge extends BaseElements{
+public class UserBadge extends BaseElements {
     private String username;
     private String role;
 

@@ -1,10 +1,10 @@
 package api.requests.steps;
 
+import api.dao.AccountDao;
 import api.dao.TransactionsDao;
+import api.dao.UserDao;
 import api.database.Condition;
 import api.database.DBRequest;
-import api.dao.UserDao;
-import api.dao.AccountDao;
 import api.configs.Config;
 import common.helpers.StepLogger;
 
@@ -14,16 +14,19 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
-public class DataBaseSteps {
+public final class DataBaseSteps {
+
+    private DataBaseSteps() { }
 
     public enum Table {
         CUSTOMERS("customers"),
         ACCOUNTS("accounts"),
         TRANSACTIONS("transactions");
 
-        Table (String name) {
+        Table(String name) {
             this.name = name;
         }
+
         private String name;
 
         public String getName() {
@@ -40,9 +43,10 @@ public class DataBaseSteps {
         BALANCE("balance"),
         ACCOUNT_ID("account_id");
 
-        TableFields (String name) {
+        TableFields(String name) {
             this.name = name;
         }
+
         private String name;
 
         public String getField() {
@@ -119,7 +123,6 @@ public class DataBaseSteps {
                     .extractAs(AccountDao.class);
         });
     }
-
 
     public static void updateAccountBalance(Long accountId, Double newBalance) {
         StepLogger.log("Update account balance in database for account ID: " + accountId + " to: " + newBalance, () -> {

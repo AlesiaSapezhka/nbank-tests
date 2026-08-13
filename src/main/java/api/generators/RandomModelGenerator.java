@@ -5,11 +5,19 @@ import com.github.curiousoddman.rgxgen.RgxGen;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
-public class RandomModelGenerator {
+public final class RandomModelGenerator {
 
-    private static final Random random = new Random();
+    private RandomModelGenerator() { }
+
+    private static final Random RANDOM = new Random();
 
     public static <T> T generate(Class<T> clazz) {
         try {
@@ -46,17 +54,17 @@ public class RandomModelGenerator {
         if (type.equals(String.class)) {
             return UUID.randomUUID().toString().substring(0, 8);
         } else if (type.equals(Integer.class) || type.equals(int.class)) {
-            return random.nextInt(1000);
+            return RANDOM.nextInt(1000);
         } else if (type.equals(Long.class) || type.equals(long.class)) {
-            return random.nextLong();
+            return RANDOM.nextLong();
         } else if (type.equals(Double.class) || type.equals(double.class)) {
-            return random.nextDouble() * 100;
+            return RANDOM.nextDouble() * 100;
         } else if (type.equals(Boolean.class) || type.equals(boolean.class)) {
-            return random.nextBoolean();
+            return RANDOM.nextBoolean();
         } else if (type.equals(List.class)) {
             return generateRandomList(field);
         } else if (type.equals(Date.class)) {
-            return new Date(System.currentTimeMillis() - random.nextInt(1000000000));
+            return new Date(System.currentTimeMillis() - RANDOM.nextInt(1000000000));
         } else {
             // Вложенный объект
             return generate(type);

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ChangeNameTest extends BaseUiTest {
     @Test
     @UserSession
-    public void userCanChangeNameTest(){
+    public void userCanChangeNameTest() {
         new UserDashboard().open().moveToEditProfile().checkPageTitle(UserDashboard.editProfileTitle);
         UpdateProfileRequest newName = UserSteps.generateValidName();
         new EditProfile().changeName(newName.getName());

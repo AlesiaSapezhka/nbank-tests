@@ -10,7 +10,10 @@ import java.util.function.Supplier;
  * 3) максимальное количество попыток
  * 4) задержка между каждой попыткой
  */
-public class RetryUtils {
+public final class RetryUtils {
+
+    private RetryUtils() { }
+
     public static <T> T retry(
             Supplier<T> action,
             Predicate<T> condition,
