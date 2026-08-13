@@ -28,5 +28,8 @@ jobs: # аналог этапов
       - name: Set up services
         run: cd infrastructure/docker_compose && bash restart-docker.sh && cd ../..
 
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
+
       - name: Run tests
         run: ./mvnw clean test
