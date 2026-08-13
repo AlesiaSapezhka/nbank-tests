@@ -32,24 +32,11 @@ services:
       - nbank-network
 
   frontend:
-    image: nobugsme/nbank-ui:latest
-    expose: # не открываем порт наружу, а даем доступ контейнерам в сети
-      - "80"
-    depends_on:
-      - backend
-    networks:
-      - nbank-network
-
-  nginx:
-    image: nginx:latest
+    image: nobugsme/nbank-ui:with_nginx
     ports:
-      - "80:80"
       - "3000:80"
-    volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - backend
-      - frontend
     networks:
       - nbank-network
 

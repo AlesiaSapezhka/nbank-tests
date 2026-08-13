@@ -33,3 +33,6 @@ jobs: # аналог этапов
 
       - name: Run tests
         run: ./mvnw clean test
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://frontend
