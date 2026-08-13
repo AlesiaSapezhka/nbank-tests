@@ -60,7 +60,7 @@ public class TransferMoneyTest extends BaseUiTest {
         SessionStorage.getSteps().createDeposit(depositRequest);
 
         new UserDashboard().open().transferMoney().checkPageTitle(UserDashboard.makeTransferTitle);
-        double transfer = RandomData.getRandomAmount(100, 500);
+        double transfer = RandomData.getRandomAmount(100, 600);
         new MakeTransfer()
                 .selectAccount(senderAccountNumber)
                 .enterRecipientName(RandomData.getUserName())
