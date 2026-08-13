@@ -15,7 +15,7 @@ jobs: # аналог этапов
         uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
-          java-version: '21'
+          java-version: '25'
 
       - name: Cache Maven repository
         uses: actions/cache@v4
@@ -26,7 +26,20 @@ jobs: # аналог этапов
             ${{ runner.os }}-maven-
 
       - name: Set up services
-        run: bash infra/docker_compose/restart_docker.sh
+        run: cd infrastructure/docker_compose && bash restart-docker.sh && cd ../..
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x mvnw
 
       - name: Run tests
         run: ./mvnw clean test
+        env:
+          APIBASEURL: http://localhost:4111
+          UIBASEURL: http://frontend
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+         name: surefire-reports
+         path: target/surefire-reports/
