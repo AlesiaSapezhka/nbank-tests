@@ -8,6 +8,7 @@ import api.requests.skelethon.requesters.CrudRequester;
 import api.requests.skelethon.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
+import common.helpers.StepLogger;
 
 import java.util.List;
 
@@ -73,7 +74,8 @@ public class UserSteps {
     }
 
     public List<CreateAccountResponse> getAllAccountsList() {
-        return new ValidatedCrudRequester<CreateAccountResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.CUSTOMER_ACCOUNTS, requestReturnsOK()).getList();
+        return StepLogger.log("User with name " + username + " get all accounts", () ->
+                new ValidatedCrudRequester<CreateAccountResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.CUSTOMER_ACCOUNTS, requestReturnsOK()).getList());
     }
 
     public List<GetTransactionsResponse> getAllTransactionsList(Integer accountId) {
