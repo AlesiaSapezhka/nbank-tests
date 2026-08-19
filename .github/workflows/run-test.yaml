@@ -4,36 +4,55 @@ on:
   push:
     paths:
       - 'src/**'
+      - 'pom.xml'
+      - 'mvnw'
+      - 'infrastructure/**'
+      - '.github/workflows/**'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
+
     steps:
+      # ---------------------------------------------------------
+      # Checkout
+      # ---------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ---------------------------------------------------------
+      # Java
+      # ---------------------------------------------------------
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
+          distribution: corretto
           java-version: '25'
+          cache: maven
 
-      - name: Cache Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
+      # ---------------------------------------------------------
+      # Docker services
+      # ---------------------------------------------------------
       - name: Set up services
-        run: cd infrastructure/docker_compose && bash restart-docker.sh && cd ../..
+        run: |
+          cd infrastructure/docker_compose
+          chmod +x restart-docker.sh
+          ./restart-docker.sh
 
+      # ---------------------------------------------------------
+      # Maven
+      # ---------------------------------------------------------
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
+      # ---------------------------------------------------------
+      # Run tests
+      # ---------------------------------------------------------
       - name: Run tests
         run: ./mvnw clean test
         env:
@@ -41,37 +60,77 @@ jobs:
           UIBASEURL: http://frontend
           APIVERSION: /api/v1
 
+      # ---------------------------------------------------------
+      # Install Swagger Coverage
+      # ---------------------------------------------------------
+      - name: Install Swagger Coverage
+        if: always()
+        run: |
+          unzip -o swagger-coverage-1.5.0.zip -d .swagger-coverage-commandline
+          chmod +x .swagger-coverage-commandline/bin/swagger-coverage-commandline
+
+      # ---------------------------------------------------------
+      # Swagger Coverage
+      # ---------------------------------------------------------
       - name: Run Swagger coverage
         if: always()
-        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://localhost:4111/v3/api-docs -i target/swagger-coverage-output
+        run: |
+          .swagger-coverage-commandline/bin/swagger-coverage-commandline \
+            -s http://localhost:4111/v3/api-docs \
+            -i target/swagger-coverage-output
 
+      # ---------------------------------------------------------
+      # Load previous Allure history
+      # ---------------------------------------------------------
       - name: Load test report history
-        uses: actions/checkout@v2
         if: always()
+        uses: actions/checkout@v4
         with:
-         ref: gh-pages
-         path: gh-pages
+          ref: gh-pages
+          path: gh-pages
 
+      # ---------------------------------------------------------
+      # Build Allure report
+      # ---------------------------------------------------------
       - name: Build test report
-        uses: simple-elf/allure-report-action@v1.7
         if: always()
+        uses: simple-elf/allure-report-action@v1.11
         with:
-         gh_pages: gh-pages
-         allure_results: target/allure-results
-         allure_history: allure-history
+          gh_pages: gh-pages
+          allure_results: target/allure-results
+          allure_history: allure-history
 
+      # ---------------------------------------------------------
+      # Add Swagger Coverage report to Allure history
+      # ---------------------------------------------------------
       - name: Build Swagger coverage report
         if: always()
-        run: sudo cp swagger-coverage-report.html allure-history/${{ github.run_number }}
+        run: |
+          mkdir -p allure-history/${{ github.run_number }}
 
+          if [ -f swagger-coverage-report.html ]; then
+            cp swagger-coverage-report.html \
+              allure-history/${{ github.run_number }}/swagger-coverage-report.html
+          else
+            echo "Swagger coverage report was not generated"
+          fi
+
+      # ---------------------------------------------------------
+      # Publish reports to GitHub Pages
+      # ---------------------------------------------------------
       - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v3
         if: always()
+        uses: peaceiris/actions-gh-pages@v4
         with:
-         github_token: ${{ secrets.GITHUB_TOKEN }}
-         publish_branch: gh-pages
-         publish_dir: allure-history
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
 
+      # ---------------------------------------------------------
+      # Cleanup
+      # ---------------------------------------------------------
       - name: Clean up services
         if: always()
-        run: cd infrastructure/docker_compose && docker compose down
+        run: |
+          cd infrastructure/docker_compose
+          docker compose down
