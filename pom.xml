@@ -13,7 +13,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <lombok.version>1.18.40</lombok.version>
     </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.viclovsky</groupId>
+            <artifactId>swagger-coverage-rest-assured</artifactId>
+            <version>1.5.0</version>
+        </dependency>
         <!-- REST Assured -->
         <dependency>
             <groupId>io.rest-assured</groupId>
