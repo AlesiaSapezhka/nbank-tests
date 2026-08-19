@@ -230,7 +230,7 @@ new AdminPanel().open()
 **pom (+):** `postgresql` 42.7.2, Allure 2.29.1 (junit5/ra/selenide).
 **Порядок:**
 
-1. `infra/docker_compose/docker-compose.yml` — Postgres 15 + nbank.  
+1. `infrastructure/docker_compose/docker-compose.yml` — Postgres 15 + nbank.  
 2. `DBRequest` + `Condition` (fluent SELECT).  
 3. DAO: `UserDao`, `AccountDao`, `TransactionsDao`.  
 4. `dao-comparison.properties` + `DaoComparator` + `DaoAndModelAssertions`.  
@@ -263,7 +263,7 @@ public void testTransferWithFraudCheck() { ... }
 nbank-tests/
 ├── pom.xml
 ├── requests/                      # HTTP Client пробы
-├── infra/docker_compose/          # Postgres + nbank API
+├── infrastructure/docker_compose/ # Postgres, nbank, UI, Selenoid
 ├── src/main/java/
 │   ├── api/
 │   │   ├── configs/               # Config
@@ -457,14 +457,14 @@ junit.jupiter.execution.parallel.config.fixed.parallelism=2
 | Allure | Задел под отчёты (`StepLogger`) |
 | WireMock | Контроль внешнего fraud API |
 
-### Docker Compose (`infra/docker_compose/`)
+### Docker Compose (`infrastructure/docker_compose/`)
 
 - **postgres:15** → `5432`, DB `nbank`  
 - **nobugsme/nbank:with_fraud_check_with_transfer_fix** → `4111`, fraud URL → host `8080`  
 - Healthchecks; named volume `postgres_data`
 
 ```bash
-cd infra/docker_compose
+cd infrastructure/docker_compose
 docker compose up -d
 docker compose ps
 docker compose logs -f nbank

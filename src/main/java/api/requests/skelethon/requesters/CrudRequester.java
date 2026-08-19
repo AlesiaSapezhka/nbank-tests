@@ -2,6 +2,7 @@ package api.requests.skelethon.requesters;
 
 import api.configs.Config;
 import common.helpers.StepLogger;
+import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;

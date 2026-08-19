@@ -28,7 +28,8 @@ public class RequestSpecs {
     }
 
     private static RequestSpecBuilder defaultRequestBuilder() {
-        return new RequestSpecBuilder().setContentType(ContentType.JSON)
+        return new RequestSpecBuilder()
+                .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .addFilters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter(), new SwaggerCoverageRestAssured(new FileSystemOutputWriter(Paths.get("target/" + OUTPUT_DIRECTORY))), new AllureRestAssured()))
                 .setBaseUri(Config.getProperty("apiBaseUrl"));
@@ -39,18 +40,28 @@ public class RequestSpecs {
     }
 
     public static RequestSpecification adminSpec() {
-        return defaultRequestBuilder().addHeader("Authorization", authHeaders.get("admin")).build();
+        return defaultRequestBuilder()
+                .addHeader("Authorization", authHeaders.get("admin"))
+                .build();
     }
 
     public static RequestSpecification authAsUserSpec(String username, String password) {
-        return defaultRequestBuilder().addHeader("Authorization", getUserAuthHeader(username, password)).build();
+        return defaultRequestBuilder()
+                .addHeader("Authorization", getUserAuthHeader(username, password))
+                .build();
     }
 
     public static String getUserAuthHeader(String username, String password) {
         String userAuthHeader;
 
         if (!authHeaders.containsKey(username)) {
-            userAuthHeader = new CrudRequester(RequestSpecs.unauthSpec(), Endpoint.LOGIN, ResponseSpecs.requestReturnsOK()).post(LoginUserRequest.builder().username(username).password(password).build()).extract().header("Authorization");
+            userAuthHeader = new CrudRequester(
+                    RequestSpecs.unauthSpec(),
+                    Endpoint.LOGIN,
+                    ResponseSpecs.requestReturnsOK())
+                    .post(LoginUserRequest.builder().username(username).password(password).build())
+                    .extract()
+                    .header("Authorization");
 
             authHeaders.put(username, userAuthHeader);
         } else {
@@ -60,4 +71,3 @@ public class RequestSpecs {
         return userAuthHeader;
     }
 }
-

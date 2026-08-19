@@ -2,9 +2,11 @@ package iteration_1.ui;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
 import common.extensions.AdminSessionExtension;
 import common.extensions.BrowserMatchExtension;
 import common.extensions.UserSessionExtension;
+import io.qameta.allure.selenide.AllureSelenide;
 import iteration_1.api.BaseTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,17 +29,15 @@ public class BaseUiTest extends BaseTest {
         Configuration.browser = api.configs.Config.getProperty("browser");
         Configuration.browserVersion = "128.0";
         Configuration.browserSize = api.configs.Config.getProperty("browserSize");
+        SelenideLogger.addListener("AllureSelenide", new AllureSelenide().screenshots(true).savePageSource(true));
+
         // VNC Chrome images expect headed Chrome; headless often breaks session startup
         Configuration.headless = false;
         Configuration.remoteConnectionTimeout = 120_000;
         Configuration.remoteReadTimeout = 120_000;
 
         MutableCapabilities caps = new MutableCapabilities();
-        caps.setCapability("selenoid:options", Map.of(
-                "enableVNC", true,
-                "enableLog", true,
-                "sessionTimeout", "5m"
-        ));
+        caps.setCapability("selenoid:options", Map.of("enableVNC", true, "enableLog", true, "sessionTimeout", "5m"));
         Configuration.browserCapabilities = caps;
     }
 

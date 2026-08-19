@@ -15,9 +15,9 @@ ${project.build.directory}/
 *.iml
 *.ipr
 
-### Allure ###
-allure-results/
-allure-report/
+### Allure (generated under target/; ignore leftovers elsewhere) ###
+**/allure-results/
+**/allure-report/
 
 ### Eclipse ###
 .apt_generated

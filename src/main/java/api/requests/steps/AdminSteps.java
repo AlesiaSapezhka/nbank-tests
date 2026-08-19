@@ -13,6 +13,7 @@ import api.requests.skelethon.requesters.ValidatedCrudRequester;
 import api.specs.RequestSpecs;
 import api.specs.ResponseSpecs;
 import com.github.curiousoddman.rgxgen.RgxGen;
+import common.helpers.StepLogger;
 import common.storage.CreatedUsersStorage;
 import io.restassured.response.ValidatableResponse;
 
@@ -77,15 +78,16 @@ public final class AdminSteps {
 
     public static CreateUserRequest createUser() {
         CreateUserRequest userRequest = RandomModelGenerator.generate(CreateUserRequest.class);
-        CreateUserResponse response = new ValidatedCrudRequester<CreateUserResponse>(
-                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
-        CreatedUsersStorage.add((int) response.getId());
-        return userRequest;
+        return StepLogger.log("Admin creates user " + userRequest.getUsername(), () -> {
+            CreateUserResponse response = new ValidatedCrudRequester<CreateUserResponse>(
+                    RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.entityWasCreated()).post(userRequest);
+            CreatedUsersStorage.add((int) response.getId());
+            return userRequest;
+        });
     }
 
     public static List<CreateUserResponse> getAllUsers() {
-        return new ValidatedCrudRequester<CreateUserResponse>(
-                RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList();
+        return StepLogger.log("Admin geta All users ", () -> new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList());
     }
 
     public static ValidatableResponse deleteUser(int userId) {
