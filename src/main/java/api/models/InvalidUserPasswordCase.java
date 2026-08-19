@@ -10,7 +10,7 @@ public enum InvalidUserPasswordCase {
             "\\s",
             "password",
             List.of(
-                    "Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long",
+                    Msg.VALIDATION,
                     "Password cannot be blank"
             )
     ),
@@ -18,30 +18,30 @@ public enum InvalidUserPasswordCase {
     TOO_SHORT(
             "[A-Za-z0-9$%&]{1,7}",
             "password",
-            List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")
+            List.of(Msg.VALIDATION)
     ),
 
     NO_DIGIT(
             "[A-Za-z]{8,12}",
             "password",
-            List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")
+            List.of(Msg.VALIDATION)
     ),
     NO_SPECIAL_CHAR(
             "[A-Za-z0-9]{8,12}",
             "password",
-            List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")
+            List.of(Msg.VALIDATION)
     ),
 
     NO_UPPERCASE(
             "[a-z0-9$%&]{8,12}",
             "password",
-            List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")
+            List.of(Msg.VALIDATION)
     ),
 
     NO_LOWERCASE(
             "[A-Z0-9$%&]{8,12}",
             "password",
-            List.of("Password must contain at least one digit, one lower case, one upper case, one special character, no spaces, and be at least 8 characters long")
+            List.of(Msg.VALIDATION)
     );
 
     private final String regex;
@@ -53,5 +53,13 @@ public enum InvalidUserPasswordCase {
         this.regex = regex;
         this.field = field;
         this.errorMessage = errorMessage;
+    }
+
+    private static final class Msg {
+        private static final String VALIDATION =
+                "Password must contain at least one digit, one lower case, one upper case, "
+                        + "one special character, no spaces, and be at least 8 characters long";
+
+        private Msg() { }
     }
 }

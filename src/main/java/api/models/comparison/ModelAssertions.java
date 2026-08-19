@@ -2,7 +2,7 @@ package api.models.comparison;
 
 import org.assertj.core.api.AbstractAssert;
 
-public class ModelAssertions extends AbstractAssert<ModelAssertions, Object> {
+public final class ModelAssertions extends AbstractAssert<ModelAssertions, Object> {
 
     private final Object request;
     private final Object response;

@@ -9,7 +9,11 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 
 /**
  * Starts a single WireMock instance and reuses it across tests.
@@ -75,6 +79,7 @@ public class FraudCheckWireMockExtension implements BeforeAllCallback, BeforeEac
             case HTTP_ERROR -> configureHttpError(DEFAULT_PORT, DEFAULT_ENDPOINT, 500);
             case TIMEOUT -> configureTimeout(DEFAULT_PORT, DEFAULT_ENDPOINT, TIMEOUT_DELAY_MS);
             case CONNECTION_ERROR -> configureConnectionError();
+            default -> throw new IllegalArgumentException("Unknown mock type: " + fraudCase.getMockType());
         }
     }
 
@@ -93,14 +98,14 @@ public class FraudCheckWireMockExtension implements BeforeAllCallback, BeforeEac
             wireMockServer.resetAll();
             configureFor("localhost", port);
 
-            String responseBody = String.format("{\n" +
-                            "  \"status\": \"%s\",\n" +
-                            "  \"decision\": \"%s\",\n" +
-                            "  \"riskScore\": %.1f,\n" +
-                            "  \"reason\": \"%s\",\n" +
-                            "  \"requiresManualReview\": %s,\n" +
-                            "  \"additionalVerificationRequired\": %s\n" +
-                            "}",
+            String responseBody = String.format("{\n"
+                            + "  \"status\": \"%s\",\n"
+                            + "  \"decision\": \"%s\",\n"
+                            + "  \"riskScore\": %.1f,\n"
+                            + "  \"reason\": \"%s\",\n"
+                            + "  \"requiresManualReview\": %s,\n"
+                            + "  \"additionalVerificationRequired\": %s\n"
+                            + "}",
                     status,
                     decision,
                     riskScore,

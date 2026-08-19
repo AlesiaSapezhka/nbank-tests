@@ -8,10 +8,10 @@ import com.codeborne.selenide.SelenideElement;
 import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Selenide.$;
 
-public class EditProfile extends BasePage <EditProfile>  {
+public class EditProfile extends BasePage<EditProfile> {
 
-    public SelenideElement newNameField= $(Selectors.byAttribute("placeholder", "Enter new name"));
-    public SelenideElement saveChangesButton= $(Selectors.byText("\uD83D\uDCBE Save Changes"));
+    public SelenideElement newNameField = $(Selectors.byAttribute("placeholder", "Enter new name"));
+    public SelenideElement saveChangesButton = $(Selectors.byText("\uD83D\uDCBE Save Changes"));
     public SelenideElement userName = $(".user-name");
 
     @Override

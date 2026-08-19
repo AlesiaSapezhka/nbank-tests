@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class Config {
+public final class Config {
     private static final Config INSTANCE = new Config();
     private final Properties properties = new Properties();
 

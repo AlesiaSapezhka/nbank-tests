@@ -26,7 +26,7 @@ public enum InvalidUsernameCase {
     TOO_LONG(
             "[A-Za-z0-9._-]{16,20}",
             "username",
-            List.of( "Username must be between 3 and 15 characters")
+            List.of("Username must be between 3 and 15 characters")
     ),
 
     INVALID_CHAR(

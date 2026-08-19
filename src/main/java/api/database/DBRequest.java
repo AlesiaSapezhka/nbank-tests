@@ -160,8 +160,8 @@ public class DBRequest {
         private List<Condition> conditions = new ArrayList<>();
         private Class<?> extractAsClass;
 
-        public DBRequestBuilder requestType(RequestType requestType) {
-            this.requestType = requestType;
+        public DBRequestBuilder requestType(RequestType type) {
+            this.requestType = type;
             return this;
         }
 
@@ -170,8 +170,8 @@ public class DBRequest {
             return this;
         }
 
-        public DBRequestBuilder table(String table) {
-            this.table = table;
+        public DBRequestBuilder table(String tableName) {
+            this.table = tableName;
             return this;
         }
 
