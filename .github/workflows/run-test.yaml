@@ -69,20 +69,32 @@ jobs:
         run: |
           SWAGGER_COVERAGE_VERSION=1.5.0
           ZIP=swagger-coverage-${SWAGGER_COVERAGE_VERSION}.zip
+
           if [ ! -f "$ZIP" ]; then
             wget -q -O "$ZIP" \
               "https://github.com/viclovsky/swagger-coverage/releases/download/${SWAGGER_COVERAGE_VERSION}/${ZIP}"
           fi
+
           rm -rf .swagger-coverage-commandline
           mkdir -p .swagger-coverage-commandline
+
           unzip -o "$ZIP" -d .swagger-coverage-commandline
-          BIN=$(find .swagger-coverage-commandline -type f -name swagger-coverage-commandline | head -1)
+
+          BIN=$(find .swagger-coverage-commandline \
+            -type f \
+            -name swagger-coverage-commandline \
+            | head -1)
+
           if [ -z "$BIN" ]; then
             echo "swagger-coverage-commandline binary not found after unzip"
             exit 1
           fi
+
           chmod +x "$BIN"
-          ln -sf "$(pwd)/$BIN" .swagger-coverage-commandline/swagger-coverage-commandline
+
+          ln -sf "$(pwd)/$BIN" \
+            .swagger-coverage-commandline/swagger-coverage-commandline
+
           echo "Installed: $BIN"
 
       # ---------------------------------------------------------
@@ -93,18 +105,75 @@ jobs:
         continue-on-error: true
         run: |
           BIN=.swagger-coverage-commandline/swagger-coverage-commandline
+
           if [ ! -x "$BIN" ]; then
             echo "Swagger coverage CLI is not installed, skip"
             exit 0
           fi
-          if [ ! -d target/swagger-coverage-output ] || [ -z "$(ls -A target/swagger-coverage-output 2>/dev/null)" ]; then
+
+          if [ ! -d target/swagger-coverage-output ] || \
+             [ -z "$(ls -A target/swagger-coverage-output 2>/dev/null)" ]; then
             echo "No swagger-coverage-output from tests, skip"
             exit 0
           fi
+
           "$BIN" \
             -s http://localhost:4111/v3/api-docs \
             -i target/swagger-coverage-output
-          ls -la swagger-coverage-report.html || ls -la *.html || true
+
+          ls -la swagger-coverage-report.html || \
+            ls -la *.html || true
+
+      # ---------------------------------------------------------
+      # API Coverage Quality Gate
+      # ---------------------------------------------------------
+      - name: Check API coverage quality gate
+        if: always()
+        run: |
+          REPORT="swagger-coverage-report.html"
+          THRESHOLD=50
+
+          if [ ! -f "$REPORT" ]; then
+            echo "❌ Swagger coverage report not found"
+            exit 1
+          fi
+
+          ALL_OPERATIONS=$(grep -oP \
+            'All operations:\s*\K[0-9]+' \
+            "$REPORT" | head -1)
+
+          WITHOUT_CALLS=$(grep -oP \
+            'Operations without calls:\s*\K[0-9]+' \
+            "$REPORT" | head -1)
+
+          if [ -z "$ALL_OPERATIONS" ] || [ -z "$WITHOUT_CALLS" ]; then
+            echo "❌ Could not extract API coverage data from Swagger report"
+            exit 1
+          fi
+
+          COVERED_OPERATIONS=$((ALL_OPERATIONS - WITHOUT_CALLS))
+
+          COVERAGE=$(awk \
+            "BEGIN {printf \"%.3f\", ($COVERED_OPERATIONS / $ALL_OPERATIONS) * 100}")
+
+          echo "----------------------------------------"
+          echo "API Coverage Quality Gate"
+          echo "----------------------------------------"
+          echo "All operations:            $ALL_OPERATIONS"
+          echo "Operations without calls: $WITHOUT_CALLS"
+          echo "Covered operations:        $COVERED_OPERATIONS"
+          echo "API coverage:              $COVERAGE%"
+          echo "Required coverage:         ${THRESHOLD}%"
+          echo "----------------------------------------"
+
+          if awk "BEGIN {exit !($COVERAGE < $THRESHOLD)}"; then
+            echo "❌ Quality Gate FAILED"
+            echo "API coverage ${COVERAGE}% is below required ${THRESHOLD}%"
+            exit 1
+          fi
+
+          echo "✅ Quality Gate PASSED"
+          echo "API coverage ${COVERAGE}% meets required ${THRESHOLD}%"
 
       # ---------------------------------------------------------
       # Load previous Allure history
@@ -118,52 +187,86 @@ jobs:
           path: gh-pages
 
       # ---------------------------------------------------------
-      # Build Allure report (no Docker action — v1.11 image build fails)
+      # Build Allure report
+      # no Docker action — v1.11 image build fails
       # ---------------------------------------------------------
       - name: Build test report
         if: always()
         run: |
           ALLURE_VERSION=2.32.0
+
           wget -q -O /tmp/allure.tgz \
             "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/${ALLURE_VERSION}/allure-commandline-${ALLURE_VERSION}.tgz"
-          sudo tar -xzf /tmp/allure.tgz -C /opt
-          sudo ln -sf "/opt/allure-${ALLURE_VERSION}/bin/allure" /usr/local/bin/allure
 
-          # Keep previous published runs (peaceiris replaces the whole branch)
+          sudo tar -xzf /tmp/allure.tgz -C /opt
+
+          sudo ln -sf \
+            "/opt/allure-${ALLURE_VERSION}/bin/allure" \
+            /usr/local/bin/allure
+
+          # Keep previous published runs
+          # peaceiris replaces the whole branch
           mkdir -p allure-history
+
           if [ -d gh-pages ]; then
-            find gh-pages -mindepth 1 -maxdepth 1 ! -name '.git' -exec cp -r {} allure-history/ \; || true
+            find gh-pages \
+              -mindepth 1 \
+              -maxdepth 1 \
+              ! -name '.git' \
+              -exec cp -r {} allure-history/ \; || true
           fi
 
           RUN_DIR="allure-history/${{ github.run_number }}"
           mkdir -p "$RUN_DIR"
+
           RESULTS=target/allure-results
 
-          if [ ! -d "$RESULTS" ] || [ -z "$(ls -A "$RESULTS" 2>/dev/null)" ]; then
+          if [ ! -d "$RESULTS" ] || \
+             [ -z "$(ls -A "$RESULTS" 2>/dev/null)" ]; then
+
             echo "No allure-results found, skipping generate"
+
             echo "<html><body>No Allure results for run ${{ github.run_number }}</body></html>" \
               > "$RUN_DIR/index.html"
+
           else
+
             LAST_HISTORY=""
+
             if [ -d allure-history/last-history ]; then
               LAST_HISTORY=allure-history/last-history
             else
-              LAST_HISTORY=$(find allure-history -type d -name history 2>/dev/null | sort | tail -1 || true)
+              LAST_HISTORY=$(find allure-history \
+                -type d \
+                -name history \
+                2>/dev/null \
+                | sort \
+                | tail -1 || true)
             fi
+
             if [ -n "$LAST_HISTORY" ] && [ -d "$LAST_HISTORY" ]; then
               mkdir -p "$RESULTS/history"
               cp -r "$LAST_HISTORY/." "$RESULTS/history/" || true
             fi
 
-            allure generate "$RESULTS" --clean -o allure-report
+            allure generate \
+              "$RESULTS" \
+              --clean \
+              -o allure-report
+
             cp -r allure-report/. "$RUN_DIR/"
+
             if [ -d allure-report/history ]; then
               rm -rf allure-history/last-history
-              cp -r allure-report/history allure-history/last-history
+
+              cp -r \
+                allure-report/history \
+                allure-history/last-history
             fi
           fi
 
-          # GitHub Pages root needs index.html — redirect to latest run
+          # GitHub Pages root needs index.html
+          # Redirect to latest run
           cat > allure-history/index.html <<EOF
           <!DOCTYPE html>
           <html lang="en">
@@ -173,15 +276,23 @@ jobs:
             <title>Allure reports</title>
           </head>
           <body>
-            <p>Latest Allure report:
-              <a href="${{ github.run_number }}/">run ${{ github.run_number }}</a>
+            <p>
+              Latest Allure report:
+              <a href="${{ github.run_number }}/">
+                run ${{ github.run_number }}
+              </a>
             </p>
-            <p>Swagger coverage:
-              <a href="${{ github.run_number }}/swagger-coverage-report.html">swagger-coverage-report.html</a>
+
+            <p>
+              Swagger coverage:
+              <a href="${{ github.run_number }}/swagger-coverage-report.html">
+                swagger-coverage-report.html
+              </a>
             </p>
           </body>
           </html>
           EOF
+
           touch allure-history/.nojekyll
 
       # ---------------------------------------------------------
@@ -191,9 +302,16 @@ jobs:
         if: always()
         run: |
           mkdir -p allure-history/${{ github.run_number }}
-          REPORT=$(find . -maxdepth 2 -name 'swagger-coverage-report.html' | head -1 || true)
+
+          REPORT=$(find . \
+            -maxdepth 2 \
+            -name 'swagger-coverage-report.html' \
+            | head -1 || true)
+
           if [ -n "$REPORT" ]; then
-            cp "$REPORT" allure-history/${{ github.run_number }}/swagger-coverage-report.html
+            cp "$REPORT" \
+              "allure-history/${{ github.run_number }}/swagger-coverage-report.html"
+
             echo "Published $REPORT"
           else
             echo "Swagger coverage report was not generated"
@@ -218,7 +336,9 @@ jobs:
         if: always()
         run: |
           if [ -f infrastructure/docker_compose/docker-compose.yml ]; then
-            docker compose -f infrastructure/docker_compose/docker-compose.yml down || true
+            docker compose \
+              -f infrastructure/docker_compose/docker-compose.yml \
+              down || true
           else
             echo "Compose file not present, skip docker compose down"
           fi
