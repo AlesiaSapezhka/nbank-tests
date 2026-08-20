@@ -2,7 +2,6 @@ package api.requests.skelethon.requesters;
 
 import api.configs.Config;
 import common.helpers.StepLogger;
-import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -14,7 +13,7 @@ import api.requests.skelethon.interfaces.CrudEndpointInterface;
 import static io.restassured.RestAssured.given;
 
 public class CrudRequester extends HttpRequests implements CrudEndpointInterface {
-    private final static String API_VERSION = Config.getProperty("apiVersion");
+    private static final String API_VERSION = Config.getProperty("apiVersion");
 
     public CrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
         super(requestSpecification, endpoint, responseSpecification);
@@ -22,7 +21,7 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
 
     @Override
     public ValidatableResponse post(BaseModel model) {
-        return StepLogger.log("POST request to " +endpoint.getUrl(), () -> {
+        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
         var body = model == null ? "" : model;
         return given()
                 .spec(requestSpecification)

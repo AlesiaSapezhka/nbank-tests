@@ -20,9 +20,9 @@ import java.util.Map;
 
 import static com.github.viclovsky.swagger.coverage.SwaggerCoverageConstants.OUTPUT_DIRECTORY;
 
-public class RequestSpecs {
+public final class RequestSpecs {
     public static final int INVALID_ACCOUNT_ID = 134;
-    private static final Map<String, String> authHeaders = new HashMap<>(Map.of("admin", "Basic YWRtaW46YWRtaW4="));
+    private static final Map<String, String> AUTH_HEADERS = new HashMap<>(Map.of("admin", "Basic YWRtaW46YWRtaW4="));
 
     private RequestSpecs() {
     }
@@ -31,7 +31,12 @@ public class RequestSpecs {
         return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
-                .addFilters(List.of(new RequestLoggingFilter(), new ResponseLoggingFilter(), new SwaggerCoverageRestAssured(new FileSystemOutputWriter(Paths.get("target/" + OUTPUT_DIRECTORY))), new AllureRestAssured()))
+                .addFilters(List.of(
+                        new RequestLoggingFilter(),
+                        new ResponseLoggingFilter(),
+                        new SwaggerCoverageRestAssured(
+                                new FileSystemOutputWriter(Paths.get("target/" + OUTPUT_DIRECTORY))),
+                        new AllureRestAssured()))
                 .setBaseUri(Config.getProperty("apiBaseUrl"));
     }
 
@@ -41,7 +46,7 @@ public class RequestSpecs {
 
     public static RequestSpecification adminSpec() {
         return defaultRequestBuilder()
-                .addHeader("Authorization", authHeaders.get("admin"))
+                .addHeader("Authorization", AUTH_HEADERS.get("admin"))
                 .build();
     }
 
@@ -54,7 +59,7 @@ public class RequestSpecs {
     public static String getUserAuthHeader(String username, String password) {
         String userAuthHeader;
 
-        if (!authHeaders.containsKey(username)) {
+        if (!AUTH_HEADERS.containsKey(username)) {
             userAuthHeader = new CrudRequester(
                     RequestSpecs.unauthSpec(),
                     Endpoint.LOGIN,
@@ -63,9 +68,9 @@ public class RequestSpecs {
                     .extract()
                     .header("Authorization");
 
-            authHeaders.put(username, userAuthHeader);
+            AUTH_HEADERS.put(username, userAuthHeader);
         } else {
-            userAuthHeader = authHeaders.get(username);
+            userAuthHeader = AUTH_HEADERS.get(username);
         }
 
         return userAuthHeader;

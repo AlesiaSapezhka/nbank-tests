@@ -121,7 +121,11 @@ public class UserSteps {
 
     public List<CreateAccountResponse> getAllAccountsList() {
         return StepLogger.log("User with name " + username + " get all accounts", () ->
-                new ValidatedCrudRequester<CreateAccountResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.CUSTOMER_ACCOUNTS, requestReturnsOK()).getList());
+                new ValidatedCrudRequester<CreateAccountResponse>(
+                        RequestSpecs.authAsUserSpec(username, password),
+                        Endpoint.CUSTOMER_ACCOUNTS,
+                        requestReturnsOK())
+                        .getList());
     }
 
     public List<GetTransactionsResponse> getAllTransactionsList(Integer accountId) {

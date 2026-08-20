@@ -87,7 +87,10 @@ public final class AdminSteps {
     }
 
     public static List<CreateUserResponse> getAllUsers() {
-        return StepLogger.log("Admin geta All users ", () -> new ValidatedCrudRequester<CreateUserResponse>(RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK()).getList());
+        return StepLogger.log("Admin geta All users ", () ->
+                new ValidatedCrudRequester<CreateUserResponse>(
+                        RequestSpecs.adminSpec(), Endpoint.ADMIN_USER, ResponseSpecs.requestReturnsOK())
+                        .getList());
     }
 
     public static ValidatableResponse deleteUser(int userId) {
