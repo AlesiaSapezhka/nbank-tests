@@ -18,7 +18,7 @@ services:
       - nbank-network
 
   backend:
-    image: nobugsme/nbank:with_validation_fix_with_swagger
+    image: nobugsme/nbank:with_fraud_check_with_swagger_fix
     ports:
       - "4111:4111"
     environment:
