@@ -112,28 +112,57 @@ jobs:
           sudo tar -xzf /tmp/allure.tgz -C /opt
           sudo ln -sf "/opt/allure-${ALLURE_VERSION}/bin/allure" /usr/local/bin/allure
 
-          mkdir -p "allure-history/${{ github.run_number }}"
+          # Keep previous published runs (peaceiris replaces the whole branch)
+          mkdir -p allure-history
+          if [ -d gh-pages ]; then
+            find gh-pages -mindepth 1 -maxdepth 1 ! -name '.git' -exec cp -r {} allure-history/ \; || true
+          fi
+
+          RUN_DIR="allure-history/${{ github.run_number }}"
+          mkdir -p "$RUN_DIR"
           RESULTS=target/allure-results
 
           if [ ! -d "$RESULTS" ] || [ -z "$(ls -A "$RESULTS" 2>/dev/null)" ]; then
             echo "No allure-results found, skipping generate"
             echo "<html><body>No Allure results for run ${{ github.run_number }}</body></html>" \
-              > "allure-history/${{ github.run_number }}/index.html"
-            exit 0
+              > "$RUN_DIR/index.html"
+          else
+            LAST_HISTORY=""
+            if [ -d allure-history/last-history ]; then
+              LAST_HISTORY=allure-history/last-history
+            else
+              LAST_HISTORY=$(find allure-history -type d -name history 2>/dev/null | sort | tail -1 || true)
+            fi
+            if [ -n "$LAST_HISTORY" ] && [ -d "$LAST_HISTORY" ]; then
+              mkdir -p "$RESULTS/history"
+              cp -r "$LAST_HISTORY/." "$RESULTS/history/" || true
+            fi
+
+            allure generate "$RESULTS" --clean -o allure-report
+            cp -r allure-report/. "$RUN_DIR/"
+            if [ -d allure-report/history ]; then
+              rm -rf allure-history/last-history
+              cp -r allure-report/history allure-history/last-history
+            fi
           fi
 
-          LAST_HISTORY=$(find gh-pages -type d -name history 2>/dev/null | sort | tail -1 || true)
-          if [ -n "$LAST_HISTORY" ]; then
-            mkdir -p "$RESULTS/history"
-            cp -r "$LAST_HISTORY/." "$RESULTS/history/" || true
-          fi
-
-          allure generate "$RESULTS" --clean -o allure-report
-          cp -r allure-report/. "allure-history/${{ github.run_number }}/"
-          if [ -d allure-report/history ]; then
-            rm -rf allure-history/last-history
-            cp -r allure-report/history allure-history/last-history
-          fi
+          # GitHub Pages root needs index.html — redirect to latest run
+          cat > allure-history/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="refresh" content="0; url=${{ github.run_number }}/" />
+            <title>Allure reports</title>
+          </head>
+          <body>
+            <p>Latest report:
+              <a href="${{ github.run_number }}/">run ${{ github.run_number }}</a>
+            </p>
+          </body>
+          </html>
+          EOF
+          touch allure-history/.nojekyll
 
       # ---------------------------------------------------------
       # Add Swagger Coverage report to Allure history
@@ -160,6 +189,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
+          force_orphan: false
 
       # ---------------------------------------------------------
       # Cleanup

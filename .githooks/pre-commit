@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+echo ">>> Running Checkstyle before commit..."
+
+if [ -x "./mvnw" ]; then
+  ./mvnw -q checkstyle:check
+elif command -v mvn >/dev/null 2>&1; then
+  mvn -q checkstyle:check
+else
+  echo "ERROR: neither ./mvnw nor mvn found"
+  exit 1
+fi
+
+echo ">>> Checkstyle OK"
