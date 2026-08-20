@@ -8,7 +8,7 @@ import lombok.Getter;
 import static com.codeborne.selenide.Selenide.$;
 
 @Getter
-public class DepositMoney extends BasePage <DepositMoney> {
+public class DepositMoney extends BasePage<DepositMoney> {
     public SelenideElement selectAccountDropDown = $("select.account-selector");
     public SelenideElement selectAccountOptions = $("select.account-selector option");
     public SelenideElement selectAccount = $("select");

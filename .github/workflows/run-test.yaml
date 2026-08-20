@@ -1,45 +1,344 @@
 name: Run tests
 
-# триггер
-on: [ push, workflow_dispatch ]
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - 'mvnw'
+      - 'infrastructure/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
-jobs: # аналог этапов
+permissions:
+  contents: write
+
+jobs:
   run-tests:
     name: Set up services (review apps) and run tests
     runs-on: ubuntu-latest
-    steps: # шаги конкретной job
-      - name: Checkout repository # копируем файлы репозитория внутрь CI агента
+
+    steps:
+      # ---------------------------------------------------------
+      # Checkout
+      # ---------------------------------------------------------
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ---------------------------------------------------------
+      # Java
+      # ---------------------------------------------------------
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'corretto'
+          distribution: corretto
           java-version: '25'
+          cache: maven
 
-      - name: Cache Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
+      # ---------------------------------------------------------
+      # Docker services
+      # ---------------------------------------------------------
       - name: Set up services
-        run: cd infrastructure/docker_compose && bash restart-docker.sh && cd ../..
+        run: |
+          cd infrastructure/docker_compose
+          chmod +x restart-docker.sh
+          ./restart-docker.sh
 
+      # ---------------------------------------------------------
+      # Maven
+      # ---------------------------------------------------------
       - name: Make Maven Wrapper executable
         run: chmod +x mvnw
 
+      # ---------------------------------------------------------
+      # Run tests
+      # ---------------------------------------------------------
       - name: Run tests
         run: ./mvnw clean test
         env:
           APIBASEURL: http://localhost:4111
           UIBASEURL: http://frontend
+          APIVERSION: /api/v1
 
-      - name: Upload test reports
+      # ---------------------------------------------------------
+      # Install Swagger Coverage
+      # ---------------------------------------------------------
+      - name: Install Swagger Coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        run: |
+          SWAGGER_COVERAGE_VERSION=1.5.0
+          ZIP=swagger-coverage-${SWAGGER_COVERAGE_VERSION}.zip
+
+          if [ ! -f "$ZIP" ]; then
+            wget -q -O "$ZIP" \
+              "https://github.com/viclovsky/swagger-coverage/releases/download/${SWAGGER_COVERAGE_VERSION}/${ZIP}"
+          fi
+
+          rm -rf .swagger-coverage-commandline
+          mkdir -p .swagger-coverage-commandline
+
+          unzip -o "$ZIP" -d .swagger-coverage-commandline
+
+          BIN=$(find .swagger-coverage-commandline \
+            -type f \
+            -name swagger-coverage-commandline \
+            | head -1)
+
+          if [ -z "$BIN" ]; then
+            echo "swagger-coverage-commandline binary not found after unzip"
+            exit 1
+          fi
+
+          chmod +x "$BIN"
+
+          ln -sf "$(pwd)/$BIN" \
+            .swagger-coverage-commandline/swagger-coverage-commandline
+
+          echo "Installed: $BIN"
+
+      # ---------------------------------------------------------
+      # Swagger Coverage
+      # ---------------------------------------------------------
+      - name: Run Swagger coverage
+        if: always()
+        continue-on-error: true
+        run: |
+          BIN=.swagger-coverage-commandline/swagger-coverage-commandline
+
+          if [ ! -x "$BIN" ]; then
+            echo "Swagger coverage CLI is not installed, skip"
+            exit 0
+          fi
+
+          if [ ! -d target/swagger-coverage-output ] || \
+             [ -z "$(ls -A target/swagger-coverage-output 2>/dev/null)" ]; then
+            echo "No swagger-coverage-output from tests, skip"
+            exit 0
+          fi
+
+          "$BIN" \
+            -s http://localhost:4111/v3/api-docs \
+            -i target/swagger-coverage-output
+
+          ls -la swagger-coverage-report.html || \
+            ls -la *.html || true
+
+      # ---------------------------------------------------------
+      # API Coverage Quality Gate
+      # ---------------------------------------------------------
+      - name: Check API coverage quality gate
+        if: always()
+        run: |
+          REPORT="swagger-coverage-report.html"
+          THRESHOLD=50
+
+          if [ ! -f "$REPORT" ]; then
+            echo "❌ Swagger coverage report not found"
+            exit 1
+          fi
+
+          ALL_OPERATIONS=$(grep -oP \
+            'All operations:\s*\K[0-9]+' \
+            "$REPORT" | head -1)
+
+          WITHOUT_CALLS=$(grep -oP \
+            'Operations without calls:\s*\K[0-9]+' \
+            "$REPORT" | head -1)
+
+          if [ -z "$ALL_OPERATIONS" ] || [ -z "$WITHOUT_CALLS" ]; then
+            echo "❌ Could not extract API coverage data from Swagger report"
+            exit 1
+          fi
+
+          COVERED_OPERATIONS=$((ALL_OPERATIONS - WITHOUT_CALLS))
+
+          COVERAGE=$(awk \
+            "BEGIN {printf \"%.3f\", ($COVERED_OPERATIONS / $ALL_OPERATIONS) * 100}")
+
+          echo "----------------------------------------"
+          echo "API Coverage Quality Gate"
+          echo "----------------------------------------"
+          echo "All operations:            $ALL_OPERATIONS"
+          echo "Operations without calls: $WITHOUT_CALLS"
+          echo "Covered operations:        $COVERED_OPERATIONS"
+          echo "API coverage:              $COVERAGE%"
+          echo "Required coverage:         ${THRESHOLD}%"
+          echo "----------------------------------------"
+
+          if awk "BEGIN {exit !($COVERAGE < $THRESHOLD)}"; then
+            echo "❌ Quality Gate FAILED"
+            echo "API coverage ${COVERAGE}% is below required ${THRESHOLD}%"
+            exit 1
+          fi
+
+          echo "✅ Quality Gate PASSED"
+          echo "API coverage ${COVERAGE}% meets required ${THRESHOLD}%"
+
+      # ---------------------------------------------------------
+      # Load previous Allure history
+      # ---------------------------------------------------------
+      - name: Load test report history
+        if: always()
+        continue-on-error: true
+        uses: actions/checkout@v4
         with:
-         name: surefire-reports
-         path: target/surefire-reports/
+          ref: gh-pages
+          path: gh-pages
+
+      # ---------------------------------------------------------
+      # Build Allure report
+      # no Docker action — v1.11 image build fails
+      # ---------------------------------------------------------
+      - name: Build test report
+        if: always()
+        run: |
+          ALLURE_VERSION=2.32.0
+
+          wget -q -O /tmp/allure.tgz \
+            "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/${ALLURE_VERSION}/allure-commandline-${ALLURE_VERSION}.tgz"
+
+          sudo tar -xzf /tmp/allure.tgz -C /opt
+
+          sudo ln -sf \
+            "/opt/allure-${ALLURE_VERSION}/bin/allure" \
+            /usr/local/bin/allure
+
+          # Keep previous published runs
+          # peaceiris replaces the whole branch
+          mkdir -p allure-history
+
+          if [ -d gh-pages ]; then
+            find gh-pages \
+              -mindepth 1 \
+              -maxdepth 1 \
+              ! -name '.git' \
+              -exec cp -r {} allure-history/ \; || true
+          fi
+
+          RUN_DIR="allure-history/${{ github.run_number }}"
+          mkdir -p "$RUN_DIR"
+
+          RESULTS=target/allure-results
+
+          if [ ! -d "$RESULTS" ] || \
+             [ -z "$(ls -A "$RESULTS" 2>/dev/null)" ]; then
+
+            echo "No allure-results found, skipping generate"
+
+            echo "<html><body>No Allure results for run ${{ github.run_number }}</body></html>" \
+              > "$RUN_DIR/index.html"
+
+          else
+
+            LAST_HISTORY=""
+
+            if [ -d allure-history/last-history ]; then
+              LAST_HISTORY=allure-history/last-history
+            else
+              LAST_HISTORY=$(find allure-history \
+                -type d \
+                -name history \
+                2>/dev/null \
+                | sort \
+                | tail -1 || true)
+            fi
+
+            if [ -n "$LAST_HISTORY" ] && [ -d "$LAST_HISTORY" ]; then
+              mkdir -p "$RESULTS/history"
+              cp -r "$LAST_HISTORY/." "$RESULTS/history/" || true
+            fi
+
+            allure generate \
+              "$RESULTS" \
+              --clean \
+              -o allure-report
+
+            cp -r allure-report/. "$RUN_DIR/"
+
+            if [ -d allure-report/history ]; then
+              rm -rf allure-history/last-history
+
+              cp -r \
+                allure-report/history \
+                allure-history/last-history
+            fi
+          fi
+
+          # GitHub Pages root needs index.html
+          # Redirect to latest run
+          cat > allure-history/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="refresh" content="0; url=${{ github.run_number }}/" />
+            <title>Allure reports</title>
+          </head>
+          <body>
+            <p>
+              Latest Allure report:
+              <a href="${{ github.run_number }}/">
+                run ${{ github.run_number }}
+              </a>
+            </p>
+
+            <p>
+              Swagger coverage:
+              <a href="${{ github.run_number }}/swagger-coverage-report.html">
+                swagger-coverage-report.html
+              </a>
+            </p>
+          </body>
+          </html>
+          EOF
+
+          touch allure-history/.nojekyll
+
+      # ---------------------------------------------------------
+      # Add Swagger Coverage report to Allure history
+      # ---------------------------------------------------------
+      - name: Build Swagger coverage report
+        if: always()
+        run: |
+          mkdir -p allure-history/${{ github.run_number }}
+
+          REPORT=$(find . \
+            -maxdepth 2 \
+            -name 'swagger-coverage-report.html' \
+            | head -1 || true)
+
+          if [ -n "$REPORT" ]; then
+            cp "$REPORT" \
+              "allure-history/${{ github.run_number }}/swagger-coverage-report.html"
+
+            echo "Published $REPORT"
+          else
+            echo "Swagger coverage report was not generated"
+          fi
+
+      # ---------------------------------------------------------
+      # Publish reports to GitHub Pages
+      # ---------------------------------------------------------
+      - name: Publish test report
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+          force_orphan: false
+
+      # ---------------------------------------------------------
+      # Cleanup
+      # ---------------------------------------------------------
+      - name: Clean up services
+        if: always()
+        run: |
+          if [ -f infrastructure/docker_compose/docker-compose.yml ]; then
+            docker compose \
+              -f infrastructure/docker_compose/docker-compose.yml \
+              down || true
+          else
+            echo "Compose file not present, skip docker compose down"
+          fi

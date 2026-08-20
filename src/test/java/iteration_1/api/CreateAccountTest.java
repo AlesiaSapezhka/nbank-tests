@@ -26,7 +26,7 @@ public class CreateAccountTest extends BaseTest {
 
         softly.assertThat(accounts).extracting(CreateAccountResponse::getId).contains(createAccountResponse.getId());
         softly.assertThat(accounts).extracting(CreateAccountResponse::getAccountNumber).contains(createAccountResponse.getAccountNumber());
-
+        // comment to trigger pipelin
         AccountDao accountDao = DataBaseSteps.getAccountByAccountNumber(createAccountResponse.getAccountNumber());
         DaoAndModelAssertions.assertThat(createAccountResponse, accountDao).match();
     }
