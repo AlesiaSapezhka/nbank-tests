@@ -65,7 +65,12 @@ jobs:
       # ---------------------------------------------------------
       - name: Install Swagger Coverage
         if: always()
+        continue-on-error: true
         run: |
+          if [ ! -f swagger-coverage-1.5.0.zip ]; then
+            echo "swagger-coverage-1.5.0.zip is not in the repo, skip"
+            exit 0
+          fi
           unzip -o swagger-coverage-1.5.0.zip -d .swagger-coverage-commandline
           chmod +x .swagger-coverage-commandline/bin/swagger-coverage-commandline
 
@@ -74,7 +79,12 @@ jobs:
       # ---------------------------------------------------------
       - name: Run Swagger coverage
         if: always()
+        continue-on-error: true
         run: |
+          if [ ! -x .swagger-coverage-commandline/bin/swagger-coverage-commandline ]; then
+            echo "Swagger coverage CLI is not installed, skip"
+            exit 0
+          fi
           .swagger-coverage-commandline/bin/swagger-coverage-commandline \
             -s http://localhost:4111/v3/api-docs \
             -i target/swagger-coverage-output
@@ -84,21 +94,46 @@ jobs:
       # ---------------------------------------------------------
       - name: Load test report history
         if: always()
+        continue-on-error: true
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
       # ---------------------------------------------------------
-      # Build Allure report
+      # Build Allure report (no Docker action — v1.11 image build fails)
       # ---------------------------------------------------------
       - name: Build test report
         if: always()
-        uses: simple-elf/allure-report-action@v1.11
-        with:
-          gh_pages: gh-pages
-          allure_results: target/allure-results
-          allure_history: allure-history
+        run: |
+          ALLURE_VERSION=2.32.0
+          wget -q -O /tmp/allure.tgz \
+            "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/${ALLURE_VERSION}/allure-commandline-${ALLURE_VERSION}.tgz"
+          sudo tar -xzf /tmp/allure.tgz -C /opt
+          sudo ln -sf "/opt/allure-${ALLURE_VERSION}/bin/allure" /usr/local/bin/allure
+
+          mkdir -p "allure-history/${{ github.run_number }}"
+          RESULTS=target/allure-results
+
+          if [ ! -d "$RESULTS" ] || [ -z "$(ls -A "$RESULTS" 2>/dev/null)" ]; then
+            echo "No allure-results found, skipping generate"
+            echo "<html><body>No Allure results for run ${{ github.run_number }}</body></html>" \
+              > "allure-history/${{ github.run_number }}/index.html"
+            exit 0
+          fi
+
+          LAST_HISTORY=$(find gh-pages -type d -name history 2>/dev/null | sort | tail -1 || true)
+          if [ -n "$LAST_HISTORY" ]; then
+            mkdir -p "$RESULTS/history"
+            cp -r "$LAST_HISTORY/." "$RESULTS/history/" || true
+          fi
+
+          allure generate "$RESULTS" --clean -o allure-report
+          cp -r allure-report/. "allure-history/${{ github.run_number }}/"
+          if [ -d allure-report/history ]; then
+            rm -rf allure-history/last-history
+            cp -r allure-report/history allure-history/last-history
+          fi
 
       # ---------------------------------------------------------
       # Add Swagger Coverage report to Allure history
@@ -132,5 +167,8 @@ jobs:
       - name: Clean up services
         if: always()
         run: |
-          cd infrastructure/docker_compose
-          docker compose down
+          if [ -f infrastructure/docker_compose/docker-compose.yml ]; then
+            docker compose -f infrastructure/docker_compose/docker-compose.yml down || true
+          else
+            echo "Compose file not present, skip docker compose down"
+          fi
