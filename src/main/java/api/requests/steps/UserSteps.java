@@ -65,8 +65,12 @@ public class UserSteps {
         return request;
     }
 
-    public static UpdateProfileResponse changeNameValid(String username, String password, BaseModel newName) {
-        return new ValidatedCrudRequester<UpdateProfileResponse>(RequestSpecs.authAsUserSpec(username, password), Endpoint.UPDATE_PROFILE, requestReturnsOK()).update(newName);
+    public static CreateUserResponse changeNameValid(String username, String password, BaseModel newName) {
+        return new ValidatedCrudRequester<CreateUserResponse>(
+                RequestSpecs.authAsUserSpec(username, password),
+                Endpoint.UPDATE_PROFILE,
+                requestReturnsOK())
+                .update(newName);
     }
 
     public static void changeNameInvalid(String username, String password, BaseModel newName) {

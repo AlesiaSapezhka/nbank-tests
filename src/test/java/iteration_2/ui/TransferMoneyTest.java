@@ -49,7 +49,7 @@ public class TransferMoneyTest extends BaseUiTest {
 
     @Test
     @UserSession
-    public void userCanTransferMoneyToTheSameAccountTest() {
+    public void userCanNotTransferMoneyToTheSameAccountTest() {
         CreateAccountResponse accountData = SessionStorage.getSteps().createAccount();
         int senderAccountId = accountData.getId();
         String senderAccountNumber = accountData.getAccountNumber();
@@ -65,12 +65,12 @@ public class TransferMoneyTest extends BaseUiTest {
                 .enterRecipientAccount(senderAccountNumber)
                 .enterAmount(transfer)
                 .setCheckbox(true)
-                .sendTransfer()
-                .shouldHaveDepositSuccessAlert(transfer, senderAccountNumber);
+                .sendTransfer();
+
+        new UserDashboard().checkAlertMessageAndAccept(BankAlerts.TRANSFER_TO_THE_SAME_ACCOUNT.getMessage());
 
         List<GetTransactionsResponse> transactions = SessionStorage.getSteps().getAllTransactionsList(senderAccountId);
-        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(transfer);
-        assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.TRANSFER_IN);
+        assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(transfer);
     }
 
     @Test

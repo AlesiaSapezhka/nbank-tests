@@ -32,7 +32,7 @@ public enum Endpoint {
             "/accounts/transfer", CreateTransferRequest.class, CreateTransferResponse.class
     ),
     UPDATE_PROFILE(
-            "/customer/profile", UpdateProfileRequest.class, UpdateProfileResponse.class
+            "/customer/profile", UpdateProfileRequest.class, CreateUserResponse.class
     ),
 
     TRANSFER_WITH_FRAUD_CHECK(
