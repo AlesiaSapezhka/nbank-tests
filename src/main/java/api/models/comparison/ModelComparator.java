@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class ModelComparator {
+public final class ModelComparator {
+
+    private ModelComparator() { }
 
     public static <A, B> ComparisonResult compareFields(A request, B response, Map<String, String> fieldMappings) {
         List<Mismatch> mismatches = new ArrayList<>();

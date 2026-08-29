@@ -1,16 +1,29 @@
 package api.requests.skelethon;
 
-import api.models.*;
+import api.models.BaseModel;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.CreateDepositResponse;
+import api.models.CreateTransferRequest;
+import api.models.CreateTransferResponse;
+import api.models.CreateUserRequest;
+import api.models.CreateUserResponse;
+import api.models.FraudCheckResponse;
+import api.models.GetTransactionsResponse;
+import api.models.LoginUserRequest;
+import api.models.LoginUserResponse;
+import api.models.UpdateProfileRequest;
+import api.models.UpdateProfileResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import api.models.*;
+
 @Getter
 @AllArgsConstructor
 public enum Endpoint {
-    ADMIN_USER (
+    ADMIN_USER(
             "/admin/users", CreateUserRequest.class, CreateUserResponse.class
     ),
-    ACCOUNTS (
+    ACCOUNTS(
             "/accounts", BaseModel.class, CreateAccountResponse.class
     ),
     CUSTOMER_ACCOUNTS(
@@ -20,13 +33,13 @@ public enum Endpoint {
             "/customer/profile", CreateUserRequest.class, CreateUserResponse.class
     ),
     LOGIN(
-            "/auth/login", LoginUserRequest.class,LoginUserResponse.class
+            "/auth/login", LoginUserRequest.class, LoginUserResponse.class
     ),
     DEPOSIT(
             "/accounts/deposit", CreateDepositRequest.class, CreateDepositResponse.class
     ),
     TRANSACTIONS(
-            "accounts/{accountId}/transactions",BaseModel.class,GetTransactionsResponse.class
+            "accounts/{accountId}/transactions", BaseModel.class, GetTransactionsResponse.class
     ),
     TRANSFER(
             "/accounts/transfer", CreateTransferRequest.class, CreateTransferResponse.class
@@ -48,7 +61,7 @@ public enum Endpoint {
     );
 
 
-    private final String Url;
+    private final String url;
     private final Class<? extends BaseModel> requestModel;
     private final Class<? extends BaseModel> responseModel;
 

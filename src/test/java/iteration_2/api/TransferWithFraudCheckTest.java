@@ -1,7 +1,12 @@
 package iteration_2.api;
 
 import api.generators.RandomData;
-import api.models.*;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.CreateTransferRequest;
+import api.models.CreateTransferResponse;
+import api.models.CreateUserRequest;
+import api.models.FraudTransferCase;
 import api.models.comparison.ModelAssertions;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.UserSteps;
@@ -28,7 +33,7 @@ import static common.extensions.FraudCheckWireMockExtension.FRAUD_WIREMOCK_LOCK;
 public class TransferWithFraudCheckTest extends BaseTest {
 
     @RegisterExtension
-    static final FraudCheckWireMockExtension fraudMock = new FraudCheckWireMockExtension();
+    static final FraudCheckWireMockExtension FRAUD_MOCK = new FraudCheckWireMockExtension();
 
     static Stream<Arguments> fraudTransferCases() {
         return Stream.of(
@@ -45,16 +50,16 @@ public class TransferWithFraudCheckTest extends BaseTest {
     @MethodSource("fraudTransferCases")
     @ParameterizedTest
     public void testTransferWithFraudCheck(FraudTransferCase fraudCase) {
-        fraudMock.configure(fraudCase);
+        FRAUD_MOCK.configure(fraudCase);
 
         CreateUserRequest user1 = AdminSteps.createUser();
         UserSteps userSteps = new UserSteps(user1.getUsername(), user1.getPassword());
 
         CreateAccountResponse account1Data = userSteps.createAccount();
-        int account_1_Id = account1Data.getId();
+        int account1Id = account1Data.getId();
 
         CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
-                .accountId(account_1_Id)
+                .accountId(account1Id)
                 .amount(RandomData.getRandomAmount(1000, 5000))
                 .build();
         userSteps.createDeposit(createDepositRequest);
@@ -63,12 +68,12 @@ public class TransferWithFraudCheckTest extends BaseTest {
         UserSteps user2Steps = new UserSteps(user2.getUsername(), user2.getPassword());
 
         CreateAccountResponse account2Data = user2Steps.createAccount();
-        int account_2_Id = account2Data.getId();
+        int account2Id = account2Data.getId();
 
         CreateTransferRequest createTransferRequest = CreateTransferRequest
                 .builder()
-                .senderAccountId(account_1_Id)
-                .receiverAccountId(account_2_Id)
+                .senderAccountId(account1Id)
+                .receiverAccountId(account2Id)
                 .amount(RandomData.getRandomAmount(100, 500))
                 .build();
         CreateTransferResponse transferResponse = UserSteps.createTransferWithFraudCheck(
@@ -76,8 +81,8 @@ public class TransferWithFraudCheckTest extends BaseTest {
 
         CreateTransferResponse expectedResponse = fraudCase.expectedResponse(
                 createTransferRequest.getAmount(),
-                account_1_Id,
-                account_2_Id
+                account1Id,
+                account2Id
         );
 
         ModelAssertions.assertThatModels(expectedResponse, transferResponse).match();

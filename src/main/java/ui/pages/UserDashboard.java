@@ -10,11 +10,11 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.switchTo;
 
 @Getter
-public class UserDashboard extends BasePage <UserDashboard> {
+public class UserDashboard extends BasePage<UserDashboard> {
     public SelenideElement welcomeText = $(Selectors.byClassName("welcome-text"));
-    public SelenideElement createNewAccount =$(Selectors.byText("➕ Create New Account"));
-    public SelenideElement depositMoney =$(Selectors.byText("\uD83D\uDCB0 Deposit Money"));
-    public SelenideElement transferMoney =$(Selectors.byText("\uD83D\uDD04 Make a Transfer"));
+    public SelenideElement createNewAccount = $(Selectors.byText("➕ Create New Account"));
+    public SelenideElement depositMoney = $(Selectors.byText("\uD83D\uDCB0 Deposit Money"));
+    public SelenideElement transferMoney = $(Selectors.byText("\uD83D\uDD04 Make a Transfer"));
     public SelenideElement editProfile = $(Selectors.byAttribute("class", "user-info"));
     public static String defaultUserName = "noname";
     public static String editProfileTitle = "✏\uFE0F Edit Profile";

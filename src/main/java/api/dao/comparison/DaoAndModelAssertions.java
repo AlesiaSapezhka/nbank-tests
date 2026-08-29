@@ -3,9 +3,11 @@ package api.dao.comparison;
 import api.models.BaseModel;
 import org.assertj.core.api.AbstractAssert;
 
-public class DaoAndModelAssertions {
+public final class DaoAndModelAssertions {
 
-    private static final DaoComparator daoComparator = new DaoComparator();
+    private DaoAndModelAssertions() { }
+
+    private static final DaoComparator DAO_COMPARATOR = new DaoComparator();
 
     public static DaoModelAssert assertThat(BaseModel apiModel, Object daoModel) {
         return new DaoModelAssert(apiModel, daoModel);
@@ -32,7 +34,7 @@ public class DaoAndModelAssertions {
 
             // Use configurable comparison
             try {
-                daoComparator.compare(apiModel, daoModel);
+                DAO_COMPARATOR.compare(apiModel, daoModel);
             } catch (AssertionError e) {
                 failWithMessage(e.getMessage());
             }

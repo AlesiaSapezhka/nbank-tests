@@ -3,7 +3,14 @@ package iteration_2.api;
 import api.dao.comparison.DaoAndModelAssertions;
 import api.dao.TransactionsDao;
 import api.generators.RandomData;
-import api.models.*;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.CreateTransferRequest;
+import api.models.CreateTransferResponse;
+import api.models.CreateUserRequest;
+import api.models.GetTransactionsResponse;
+import api.models.InvalidTransferCase;
+import api.models.TransactionsTypes;
 import api.requests.steps.DataBaseSteps;
 import iteration_1.api.BaseTest;
 import api.models.comparison.ModelAssertions;
@@ -22,7 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransferMoneyTest extends BaseTest {
     public static Stream<Arguments> transferInvalidData() {
-        return Stream.of(Arguments.of(InvalidTransferCase.NEGATIVE), Arguments.of(InvalidTransferCase.EXCEED_LIMIT), Arguments.of(InvalidTransferCase.MORE_THAN_BALANCE));
+        return Stream.of(
+                Arguments.of(InvalidTransferCase.NEGATIVE),
+                Arguments.of(InvalidTransferCase.EXCEED_LIMIT),
+                Arguments.of(InvalidTransferCase.MORE_THAN_BALANCE));
     }
 
     @Test
@@ -39,18 +49,25 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse receiverAccountData = userSteps.createAccount();
         int receiverAccountId = receiverAccountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         userSteps.createDeposit(createDepositRequest);
 
-        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(RandomData.getRandomAmount(100, 500)).build();
-        CreateTransferResponse transferResponse = UserSteps.createTransfer(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
+        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(receiverAccountId)
+                .amount(RandomData.getRandomAmount(100, 500)).build();
+        CreateTransferResponse transferResponse = UserSteps.createTransfer(
+                userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
 
         ModelAssertions.assertThatModels(createTransferRequest, transferResponse).match();
         softly.assertThat(transferResponse.getMessage()).isEqualTo(ResponseSpecs.TRANSFER_SUCCESSFUL);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).contains(createTransferRequest.getAmount());
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).contains(TransactionsTypes.TRANSFER_OUT);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount)
+                .contains(createTransferRequest.getAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType)
+                .contains(TransactionsTypes.TRANSFER_OUT);
 
         GetTransactionsResponse transferOut = transactions.stream()
                 .filter(t -> t.getType() == TransactionsTypes.TRANSFER_OUT)
@@ -77,15 +94,21 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse accountData = userSteps.createAccount();
         int senderAccountId = accountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 5000)).build();
         userSteps.createDeposit(createDepositRequest);
 
-        int InvalidReceiverId = 987;
-        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(InvalidReceiverId).amount(RandomData.getRandomAmount(100, 500)).build();
-        UserSteps. createTransferWithInvalidAccount(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
+        int invalidReceiverId = 987;
+        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(invalidReceiverId)
+                .amount(RandomData.getRandomAmount(100, 500)).build();
+        UserSteps.createTransferWithInvalidAccount(
+                userRequest.getUsername(), userRequest.getPassword(), createTransferRequest);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createTransferRequest.getAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount)
+                .doesNotContain(createTransferRequest.getAmount());
 
         List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(senderAccountId);
         assertThat(transactionsDao)
@@ -109,15 +132,22 @@ public class TransferMoneyTest extends BaseTest {
         CreateAccountResponse receiverAccountData = userSteps.createAccount();
         int receiverAccountId = receiverAccountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 2000)).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(senderAccountId).amount(RandomData.getRandomAmount(1000, 2000)).build();
         userSteps.createDeposit(createDepositRequest);
 
-        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder().senderAccountId(senderAccountId).receiverAccountId(receiverAccountId).amount(invalidCase.getTransferAmount()).build();
-        UserSteps.createTransferWithInvalidCases(userRequest.getUsername(), userRequest.getPassword(), createTransferRequest,invalidCase);
+        CreateTransferRequest createTransferRequest = CreateTransferRequest.builder()
+                .senderAccountId(senderAccountId)
+                .receiverAccountId(receiverAccountId)
+                .amount(invalidCase.getTransferAmount()).build();
+        UserSteps.createTransferWithInvalidCases(
+                userRequest.getUsername(), userRequest.getPassword(), createTransferRequest, invalidCase);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(senderAccountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(invalidCase.getTransferAmount());
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType).doesNotContain(TransactionsTypes.TRANSFER_OUT);
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount)
+                .doesNotContain(invalidCase.getTransferAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getType)
+                .doesNotContain(TransactionsTypes.TRANSFER_OUT);
 
         List<TransactionsDao> transactionsDao = DataBaseSteps.getTransactionsByAccountId(senderAccountId);
         assertThat(transactionsDao)

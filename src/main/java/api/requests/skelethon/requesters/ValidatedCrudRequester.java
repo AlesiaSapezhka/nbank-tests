@@ -12,7 +12,9 @@ import java.util.List;
 public class ValidatedCrudRequester<T extends BaseModel> extends HttpRequests implements CrudEndpointInterface {
     private final CrudRequester crudRequester;
 
-    public ValidatedCrudRequester(RequestSpecification requestSpecification, Endpoint endpoint, ResponseSpecification responseSpecification) {
+    public ValidatedCrudRequester(
+            RequestSpecification requestSpecification, Endpoint endpoint,
+            ResponseSpecification responseSpecification) {
         super(requestSpecification, endpoint, responseSpecification);
         this.crudRequester = new CrudRequester(requestSpecification, endpoint, responseSpecification);
     }

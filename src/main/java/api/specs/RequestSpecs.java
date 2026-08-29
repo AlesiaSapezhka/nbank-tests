@@ -15,18 +15,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestSpecs {
+public final class RequestSpecs {
     private static Map<String, String> authHeaders = new HashMap<>(Map.of("admin", "Basic YWRtaW46YWRtaW4="));
     public static final int INVALID_ACCOUNT_ID = 134;
 
-    private RequestSpecs(){}
+    private RequestSpecs() { }
 
     private static RequestSpecBuilder defaultRequestBuilder() {
         return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .addFilters(List.of(new RequestLoggingFilter(),
-                        new ResponseLoggingFilter(), new AllureRestAssured()))
+                        new ResponseLoggingFilter()))
                 .setBaseUri(Config.getProperty("apiBaseUrl") + Config.getProperty("apiVersion"));
     }
 
@@ -42,7 +42,7 @@ public class RequestSpecs {
 
     public static RequestSpecification authAsUserSpec(String username, String password) {
         return defaultRequestBuilder()
-                .addHeader("Authorization",getUserAuthHeader(username, password))
+                .addHeader("Authorization", getUserAuthHeader(username, password))
                 .build();
     }
 
@@ -66,4 +66,3 @@ public class RequestSpecs {
         return userAuthHeader;
     }
 }
-

@@ -42,7 +42,7 @@ public class CreateUserTest extends BaseUiTest {
                 .checkAlertMessageAndAccept(BankAlerts.USERNAME_MUST_BE_BETWEEN_3_AND_15_CHARACTERS.getMessage())
                 .getAllUsers()
                 .stream()
-                .noneMatch(userBadge-> userBadge.getUsername().equals(newUser.getUsername())));
+                .noneMatch(userBadge -> userBadge.getUsername().equals(newUser.getUsername())));
 
         List<CreateUserResponse> users = getAllUsers();
         assertThat(users).noneSatisfy(user -> ModelAssertions.assertThatModels(newUser, user).match());

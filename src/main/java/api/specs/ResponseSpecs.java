@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 
-public class ResponseSpecs {
+public final class ResponseSpecs {
 
     private ResponseSpecs() {
     }
@@ -57,13 +57,14 @@ public class ResponseSpecs {
             "Fraud detection service is currently unavailable";
 
     public static final String FRAUD_SERVICE_HTTP_ERROR_REASON =
-            "Unexpected error during fraud check: 500 Server Error: \"{\"error\":\"fraud service error\"}\"";
+            "Unexpected error during fraud check: 500 Server Error: "
+                    + "\"{\"error\":\"fraud service error\"}\"";
 
     public static final String FRAUD_SERVICE_TIMEOUT_REASON =
-            "Unexpected error during fraud check: Cannot invoke \"java.lang.Boolean.booleanValue()\" because the return value of \"me.nobugs.bank.services.FraudDetectionClientService$FraudCheckResponse.getRequiresManualReview()\" is null";
-
-
-
+            "Unexpected error during fraud check: Cannot invoke "
+                    + "\"java.lang.Boolean.booleanValue()\" because the return value of "
+                    + "\"me.nobugs.bank.services.FraudDetectionClientService$FraudCheckResponse"
+                    + ".getRequiresManualReview()\" is null";
 
     private static ResponseSpecBuilder defaultResponseBuilder() {
         return new ResponseSpecBuilder();
@@ -93,6 +94,6 @@ public class ResponseSpecs {
     }
 
     public static ResponseSpecification requestReturnsForbiddenRequestWithoutKey(String errorMessage) {
-        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).expectBody("message",equalTo(errorMessage)).build();
+        return defaultResponseBuilder().expectStatusCode(HttpStatus.SC_FORBIDDEN).expectBody("message", equalTo(errorMessage)).build();
     }
 }
