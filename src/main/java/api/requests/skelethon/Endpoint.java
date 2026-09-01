@@ -13,7 +13,6 @@ import api.models.GetTransactionsResponse;
 import api.models.LoginUserRequest;
 import api.models.LoginUserResponse;
 import api.models.UpdateProfileRequest;
-import api.models.UpdateProfileResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

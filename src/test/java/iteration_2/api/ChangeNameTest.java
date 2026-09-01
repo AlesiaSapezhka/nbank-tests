@@ -2,7 +2,10 @@ package iteration_2.api;
 
 import api.dao.UserDao;
 import api.dao.comparison.DaoAndModelAssertions;
-import api.models.*;
+import api.models.CreateUserRequest;
+import api.models.CreateUserResponse;
+import api.models.InvalidChangeNameCase;
+import api.models.UpdateProfileRequest;
 import api.requests.steps.DataBaseSteps;
 import iteration_1.api.BaseTest;
 import org.junit.jupiter.api.Test;

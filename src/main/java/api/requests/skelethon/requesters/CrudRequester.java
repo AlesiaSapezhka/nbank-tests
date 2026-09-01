@@ -18,7 +18,7 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
 
     @Override
     public ValidatableResponse post(BaseModel model) {
-        return StepLogger.log("POST request to " +endpoint.getUrl(), () -> {
+        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
         var body = model == null ? "" : model;
         return given()
                 .spec(requestSpecification)
