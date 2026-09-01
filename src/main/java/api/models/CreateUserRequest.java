@@ -1,8 +1,11 @@
 package api.models;
 
 import api.generators.GeneratingRule;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -22,4 +25,3 @@ public class CreateUserRequest extends BaseModel {
                 .password(api.configs.Config.getProperty("admin.password")).build();
     }
 }
-

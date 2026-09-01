@@ -1,5 +1,7 @@
 package ui.utils;
 
+import common.helpers.StepLogger;
+
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -10,22 +12,26 @@ import java.util.function.Supplier;
  * 3) максимальное количество попыток
  * 4) задержка между каждой попыткой
  */
-public class RetryUtils {
-    public static <T> T retry(
-            Supplier<T> action,
-            Predicate<T> condition,
-            int maxAttempts,
-            long delayMillis) {
+public final class RetryUtils {
+
+    private RetryUtils() {
+    }
+
+    public static <T> T retry(String title, Supplier<T> action, Predicate<T> condition, int maxAttempts, long delayMillis) {
 
         T result = null;
         int attempts = 0;
 
         while (attempts < maxAttempts) {
             attempts++;
-            result = action.get();
+            try {
+                result = StepLogger.log("Attempt " + attempts + ": " + title, () -> action.get());
 
-            if (condition.test(result)) {
-                return result;
+                if (condition.test(result)) {
+                    return result;
+                }
+            } catch (Throwable e) {
+                System.out.println("Exception " + e.getMessage());
             }
 
             try {

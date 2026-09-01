@@ -14,7 +14,9 @@ public enum BankAlerts {
     DEPOSIT_WITHOUT_SELECTING_ACCOUNT("❌ Please select an account."),
     TRANSFER_SUCCESSFUL("✅ Successfully transferred $"),
     TRANSFER_MISSED_FIELDS("❌ Please fill all fields and confirm."),
-    TRANSFER_INCREASED_BALANCE("❌ Error: Invalid transfer: insufficient funds or invalid accounts");
+    TRANSFER_INCREASED_BALANCE("Invalid transfer: insufficient funds or invalid accounts"),
+    TRANSFER_TO_THE_SAME_ACCOUNT("❌ You cannot transfer money to the same account.");
+
     private final String message;
 
     BankAlerts(String message) {

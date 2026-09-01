@@ -3,7 +3,13 @@ package iteration_2.api;
 import api.dao.TransactionsDao;
 import api.dao.comparison.DaoAndModelAssertions;
 import api.generators.RandomData;
-import api.models.*;
+import api.models.CreateAccountResponse;
+import api.models.CreateDepositRequest;
+import api.models.CreateDepositResponse;
+import api.models.CreateUserRequest;
+import api.models.GetTransactionsResponse;
+import api.models.InvalidDepositCase;
+import api.models.TransactionsTypes;
 import api.models.comparison.ModelAssertions;
 import api.requests.steps.AdminSteps;
 import api.requests.steps.DataBaseSteps;
@@ -23,7 +29,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CreateDepositTest extends BaseTest {
 
     static Stream<Arguments> depositInvalidData() {
-        return Stream.of(Arguments.of(InvalidDepositCase.NEGATIVE), Arguments.of(InvalidDepositCase.EXCEED_LIMIT), Arguments.of(InvalidDepositCase.ZERO));
+        return Stream.of(
+                Arguments.of(InvalidDepositCase.NEGATIVE),
+                Arguments.of(InvalidDepositCase.EXCEED_LIMIT),
+                Arguments.of(InvalidDepositCase.ZERO));
     }
 
     public static Stream<Arguments> depositValidData() {
@@ -39,7 +48,8 @@ public class CreateDepositTest extends BaseTest {
         CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(accountId).amount(deposit).build();
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(accountId).amount(deposit).build();
         CreateDepositResponse createDepositResponse = userSteps.createDeposit(createDepositRequest);
 
         ModelAssertions.assertThatModels(createDepositRequest, createDepositResponse).match();
@@ -71,11 +81,14 @@ public class CreateDepositTest extends BaseTest {
         CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(accountId).amount(invalidCase.getDepositAmount()).build();
-        UserSteps.createDepositInvalidData(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest, invalidCase);
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(accountId).amount(invalidCase.getDepositAmount()).build();
+        UserSteps.createDepositInvalidData(
+                userRequest.getUsername(), userRequest.getPassword(), createDepositRequest, invalidCase);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(invalidCase.getDepositAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount)
+                .doesNotContain(invalidCase.getDepositAmount());
 
         List<TransactionsDao> depositDao = DataBaseSteps.getTransactionsByAccountId(accountId);
         assertThat(depositDao)
@@ -91,11 +104,15 @@ public class CreateDepositTest extends BaseTest {
         CreateAccountResponse accountData = userSteps.createAccount();
         int accountId = accountData.getId();
 
-        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder().accountId(RequestSpecs.INVALID_ACCOUNT_ID).amount(RandomData.getRandomAmount(1000, 5000)).build();
-        UserSteps.createDepositInvalidAccount(userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
+        CreateDepositRequest createDepositRequest = CreateDepositRequest.builder()
+                .accountId(RequestSpecs.INVALID_ACCOUNT_ID)
+                .amount(RandomData.getRandomAmount(1000, 5000)).build();
+        UserSteps.createDepositInvalidAccount(
+                userRequest.getUsername(), userRequest.getPassword(), createDepositRequest);
 
         List<GetTransactionsResponse> transactions = userSteps.getAllTransactionsList(accountId);
-        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount).doesNotContain(createDepositRequest.getAmount());
+        softly.assertThat(transactions).extracting(GetTransactionsResponse::getAmount)
+                .doesNotContain(createDepositRequest.getAmount());
 
         List<TransactionsDao> depositDao = DataBaseSteps.getTransactionsByAccountId(accountId);
         assertThat(depositDao)

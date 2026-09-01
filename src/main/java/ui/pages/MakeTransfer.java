@@ -6,7 +6,7 @@ import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Selenide.$;
 
-public class MakeTransfer extends BasePage <MakeTransfer>{
+public class MakeTransfer extends BasePage<MakeTransfer> {
     public SelenideElement selectAccountDropDown = $("select.account-selector");
     public SelenideElement selectAccountOptions = $("select.account-selector option");
     public SelenideElement selectAccount = $("select");

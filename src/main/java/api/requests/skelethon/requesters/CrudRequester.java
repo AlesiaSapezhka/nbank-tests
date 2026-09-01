@@ -1,5 +1,6 @@
 package api.requests.skelethon.requesters;
 
+import common.helpers.StepLogger;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
@@ -17,6 +18,7 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
 
     @Override
     public ValidatableResponse post(BaseModel model) {
+        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> {
         var body = model == null ? "" : model;
         return given()
                 .spec(requestSpecification)
@@ -24,60 +26,65 @@ public class CrudRequester extends HttpRequests implements CrudEndpointInterface
                 .post(endpoint.getUrl())
                 .then()
                 .spec(responseSpecification);
+        });
     }
 
     @Override
     public ValidatableResponse post() {
-        return given()
-                .spec(requestSpecification)
-                .post(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification);
+        return StepLogger.log("POST request to " + endpoint.getUrl(), () -> given()
+            .spec(requestSpecification)
+            .post(endpoint.getUrl())
+            .then()
+            .spec(responseSpecification));
     }
 
     @Override
     public ValidatableResponse get() {
-        return given()
+        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> given()
                 .spec(requestSpecification)
                 .when()
                 .get(endpoint.getUrl())
                 .then()
-                .spec(responseSpecification);
+                .spec(responseSpecification)
+        );
     }
 
     @Override
     public ValidatableResponse get(Integer accountId) {
-        return given()
+        return StepLogger.log("GET request to " + endpoint.getUrl(), () -> given()
                 .spec(requestSpecification)
                 .pathParam("accountId", accountId)
                 .when()
                 .get(endpoint.getUrl())
                 .then()
-                .spec(responseSpecification);
+                .spec(responseSpecification)
+        );
     }
 
     @Override
     public ValidatableResponse update(BaseModel model) {
-        var body = model == null ? "" : model;
-
-        return given()
-                .spec(requestSpecification)
-                .body(body)
-                .when()
-                .put(endpoint.getUrl())
-                .then()
-                .spec(responseSpecification);
+        return StepLogger.log("PUT request to " + endpoint.getUrl(), () -> {
+            var body = model == null ? "" : model;
+            return given()
+                    .spec(requestSpecification)
+                    .body(body)
+                    .when()
+                    .put(endpoint.getUrl())
+                    .then()
+                    .spec(responseSpecification);
+        });
     }
 
     @Override
     public ValidatableResponse delete(int id) {
-        return given()
+        return StepLogger.log("DELETE request to " + endpoint.getUrl(), () -> given()
                 .spec(requestSpecification)
                 .pathParam("id", id)
                 .when()
                 .delete(endpoint.getUrl())
                 .then()
-                .spec(responseSpecification);
+                .spec(responseSpecification)
+        );
     }
 }
 
